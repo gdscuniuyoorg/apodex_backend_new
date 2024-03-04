@@ -1,0 +1,271 @@
+import { RequestHandler, Request, Response } from 'express';
+import User, { IUser } from '../models/userModel';
+import AppError from '../utils/appError';
+import catchAsync from '../utils/catchAsync';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import sendEmail from '../utils/email';
+import crypto from 'crypto';
+import { ICookieOption, TokenUser } from '../types';
+import confirmEmailTemplate from '../utils/confirmEmailTemplate';
+
+export interface CustomRequest extends Request {
+  user?: IUser;
+}
+
+class AuthController {
+  signToken = (user: TokenUser, isRefresh = false) => {
+    return jwt.sign(
+      isRefresh ? { id: user.id } : user,
+      process.env.JWT_SECRET || '',
+      {
+        expiresIn: isRefresh
+          ? process.env.REFRESH_EXPIRES_IN
+          : process.env.JWT_EXPIRES_IN,
+      },
+    );
+  };
+
+  createAndSendToken = (user: any, statusCode: number, res: Response) => {
+    const token = this.signToken({ id: user.id, email: user.email });
+    const refreshToken = this.signToken({ id: user.id }, true);
+    const cookieExpireTime = process.env.JWT_COOKIE_EXPIRES_IN;
+
+    // check if cookie expire time is available
+    if (!cookieExpireTime)
+      return new AppError('Cookie expire time not found', 400);
+
+    // set cookie options
+    const cookieOptions: ICookieOption = {
+      expires: new Date(
+        Date.now() + parseFloat(cookieExpireTime) * 24 * 60 * 60 * 1000,
+      ),
+      httpOnly: true,
+    };
+
+    // sends a secure jwt token to the browser that would be sent back to us upon every request
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    res.cookie('jwt', token, cookieOptions);
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+
+    // this makes the password and active not show in the response it send to the browser
+    user.password = undefined;
+
+    res.status(statusCode).json({
+      status: 'success',
+      token,
+      refreshToken,
+      user,
+    });
+  };
+
+  signup: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
+    const { name, email, password, passwordConfirm, role } = req.body;
+    const user: IUser = await User.create({
+      name,
+      email,
+      password,
+      passwordConfirm,
+      role,
+    });
+
+    if (!user) {
+      return next(
+        new AppError('Sign-up not successfull, an error occured', 400),
+      );
+    }
+
+    // send confirmation email
+    const confirmEmailToken = crypto.randomBytes(32).toString('hex');
+    user.confirmEmailToken = confirmEmailToken;
+    await user.save({ validateBeforeSave: false });
+
+    const resetUrl = `${req.protocol}://${req.get(
+      'host',
+    )}/api/v1/user/confirmEmail/${confirmEmailToken}`;
+
+    const html = confirmEmailTemplate();
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Email Confirmation',
+        html,
+      });
+
+      res.status(201).json({
+        status: 'success',
+        message: 'Email Confirmation token sent successfully',
+      });
+    } catch (err) {
+      res
+        .status(400)
+        .json({ message: 'There was an error, try again', status: 'error' });
+    }
+  });
+
+  login: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
+    const { email, password } = req.body;
+
+    //check if email and password is valid
+    if (!email || !password) {
+      return next(new AppError('Please provide a password and an email', 400));
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user || !(await user!.comparePassword(password))) {
+      return next(new AppError('User email or password is invalid', 404));
+    }
+
+    this.createAndSendToken(user, 201, res);
+  });
+
+  forgetPassword: RequestHandler = catchAsync(
+    async (req, res, next): Promise<void> => {
+      // forget password
+      const { email } = req.body;
+
+      // find account to confirm availability
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return next(new AppError('Please, input valid email', 400));
+      }
+
+      const resetToken = user.sendPasswordResetToken();
+      await user.save({ validateBeforeSave: false });
+
+      const resetUrl = `${req.protocol}://${req.get(
+        'host',
+      )}/api/v1/user/resetPassword/${resetToken}`;
+
+      const message = `Forget your password, Visit this link to reset your password : ${resetUrl} \nIf you didnt forget your password, ignore this email`;
+
+      try {
+        await sendEmail({
+          email: user.email,
+          subject: 'Reset Password',
+          message,
+        });
+
+        res.status(201).json({
+          status: 'success',
+          message: 'Password reset token sent successfully',
+        });
+      } catch (err) {
+        res
+          .status(400)
+          .json({ message: 'There was an error, try again', status: 'error' });
+      }
+    },
+  );
+
+  resetPassword: RequestHandler = catchAsync(
+    async (req, res, next): Promise<void> => {
+      // confirm the reset Token
+
+      const { password, passwordConfirm } = req.body;
+
+      const { resetToken } = req.params;
+
+      const passwordResetToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
+
+      const user = await User.findOne({ passwordResetToken });
+
+      if (!user || !user.checkResetTokenExpiration()) {
+        return next(new AppError('Invalid or expired reset Token', 400));
+      }
+
+      user.password = password;
+      user.passwordConfirm = passwordConfirm;
+      user.passwordResetToken = undefined;
+      user.passwordResetTokenExpireTime = undefined;
+      await user.save();
+
+      res.status(201).json({
+        message: 'success',
+      });
+    },
+  );
+
+  protect: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next): Promise<void> => {
+      // check the headers bearer token
+      let token: string | undefined;
+
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+      ) {
+        token = req.headers.authorization.split(' ')[1];
+      }
+
+      if (!token) {
+        return next(new AppError('auth token not available in header', 404));
+      }
+
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || '',
+      ) as JwtPayload;
+
+      const user = await User.findOne({
+        _id: decoded.id,
+        email: decoded.email,
+      });
+
+      if (!user) {
+        return next(new AppError('The user does not exist', 400));
+      }
+
+      const isChangePassword = user.checkPasswordChange(decoded.iat as number);
+
+      if (isChangePassword) {
+        return next(
+          new AppError(
+            'This user is a fraud, password was changed amidst request',
+            400,
+          ),
+        );
+      }
+
+      req.user = user;
+      next();
+    },
+  );
+  // send refresh token
+  refreshToken: RequestHandler = catchAsync(async (req, res, next) => {
+    const { refreshToken } = req.body;
+
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_SECRET || '',
+    ) as JwtPayload;
+
+    const user = await User.findOne({
+      _id: decoded.id,
+    });
+
+    if (!user) {
+      return next(new AppError('Refresh token is invalid', 400));
+    }
+
+    res.status(200).json({ token: this.signToken({ id: user.id }) });
+  });
+
+  restrictTo = (...roles: string[]): RequestHandler =>
+    catchAsync(async (req: CustomRequest, res, next): Promise<void> => {
+      if (!roles.includes(req.user?.role as string)) {
+        res.status(402).json({
+          message: 'Does not have permission to access resource',
+          status: 'failed',
+        });
+      }
+
+      next();
+    });
+}
+
+export default new AuthController();
