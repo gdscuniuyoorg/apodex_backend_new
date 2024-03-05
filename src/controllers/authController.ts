@@ -7,6 +7,7 @@ import sendEmail from '../utils/email';
 import crypto from 'crypto';
 import { ICookieOption, TokenUser } from '../types';
 import confirmEmailTemplate from '../utils/confirmEmailTemplate';
+import ENV from '../env_files';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -14,21 +15,15 @@ export interface CustomRequest extends Request {
 
 class AuthController {
   signToken = (user: TokenUser, isRefresh = false) => {
-    return jwt.sign(
-      isRefresh ? { id: user.id } : user,
-      process.env.JWT_SECRET || '',
-      {
-        expiresIn: isRefresh
-          ? process.env.REFRESH_EXPIRES_IN
-          : process.env.JWT_EXPIRES_IN,
-      },
-    );
+    return jwt.sign(isRefresh ? { id: user.id } : user, ENV.JWT_SECRET || '', {
+      expiresIn: isRefresh ? ENV.JWT_COOKIE_EXPIRES_IN : ENV.JWT_SECRET_IN,
+    });
   };
 
   createAndSendToken = (user: any, statusCode: number, res: Response) => {
     const token = this.signToken({ id: user.id, email: user.email });
     const refreshToken = this.signToken({ id: user.id }, true);
-    const cookieExpireTime = process.env.JWT_COOKIE_EXPIRES_IN;
+    const cookieExpireTime = ENV.JWT_COOKIE_EXPIRES_IN;
 
     // check if cookie expire time is available
     if (!cookieExpireTime)
@@ -43,7 +38,7 @@ class AuthController {
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
-    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
@@ -57,6 +52,31 @@ class AuthController {
       user,
     });
   };
+
+  //   signup or signin with google
+  googleSignUp: RequestHandler = catchAsync(
+    async (req, res, next): Promise<void> => {},
+  );
+
+  confirmEmailAndActivateAccount: RequestHandler = catchAsync(
+    async (req, res, next) => {
+      const { confirmEmailToken } = req.params;
+
+      console.log(confirmEmailTemplate)
+
+      const user: IUser | null = await User.findOne({
+        confirmEmailToken,
+      });
+
+      if (!user) {
+        return next(new AppError('User not found', 404));
+      }
+      user.isEmailConfirmed = true;
+      user.save({ validateBeforeSave: false });
+
+      res.redirect('localhost:3000/home');
+    },
+  );
 
   signup: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
     const { name, email, password, passwordConfirm, role } = req.body;
@@ -79,11 +99,11 @@ class AuthController {
     user.confirmEmailToken = confirmEmailToken;
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${req.protocol}://${req.get(
+    const confirmEmailUrl = `${req.protocol}://${req.get(
       'host',
-    )}/api/v1/user/confirmEmail/${confirmEmailToken}`;
+    )}/api/v1/users/confirmEmail/${confirmEmailToken}`;
 
-    const html = confirmEmailTemplate();
+    const html = confirmEmailTemplate(confirmEmailUrl);
     try {
       await sendEmail({
         email: user.email,
@@ -95,10 +115,12 @@ class AuthController {
         status: 'success',
         message: 'Email Confirmation token sent successfully',
       });
-    } catch (err) {
-      res
-        .status(400)
-        .json({ message: 'There was an error, try again', status: 'error' });
+    } catch (err: any) {
+      res.status(400).json({
+        message: err.message || 'There was an error sending email, try again',
+        status: 'error',
+        error: err,
+      });
     }
   });
 
@@ -206,10 +228,7 @@ class AuthController {
         return next(new AppError('auth token not available in header', 404));
       }
 
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET || '',
-      ) as JwtPayload;
+      const decoded = jwt.verify(token, ENV.JWT_SECRET || '') as JwtPayload;
 
       const user = await User.findOne({
         _id: decoded.id,
@@ -241,7 +260,7 @@ class AuthController {
 
     const decoded = jwt.verify(
       refreshToken,
-      process.env.JWT_SECRET || '',
+      ENV.JWT_SECRET || '',
     ) as JwtPayload;
 
     const user = await User.findOne({

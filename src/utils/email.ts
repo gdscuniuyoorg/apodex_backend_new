@@ -1,4 +1,5 @@
 import nodemailer, { Transporter } from 'nodemailer';
+import ENV from '../env_files';
 
 interface optionsTypes {
   email: string;
@@ -9,17 +10,17 @@ interface optionsTypes {
 
 const sendEmail = async (options: optionsTypes) => {
   const transporter: Transporter = nodemailer.createTransport({
-    host: 'sandbox.smtp.mailtrap.io',
-    port: 587,
+    host: ENV.EMAIL_HOST,
+    port: +ENV.EMAIL_PORT,
     secure: false,
     auth: {
-      pass: process.env.MAILTRAP_PASSWORD,
-      user: process.env.MAILTRAP_USERNAME,
+      pass: ENV.EMAIL_PASSWORD,
+      user: ENV.EMAIL_USERNAME,
     },
   });
 
   const mailOptions = {
-    from: 'Reset Password by Hoot Quiz <regnalukpabio@gmail.com>',
+    from: 'Apodex by GDSC, Uniuyo <regnalukpabio@gmail.com>',
     to: options.email,
     subject: options.subject,
     text: options.message,
