@@ -10,6 +10,7 @@ import confirmEmailTemplate from '../utils/confirmEmailTemplate';
 import ENV from '../env_files';
 import querystring from 'querystring';
 import axios from 'axios';
+import { google } from 'googleapis';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -90,9 +91,29 @@ class AuthController {
       },
     });
 
-    const accessToken = response.data.access_token;
+    const { access_token } = response.data;
 
-    res.status(200).json({ response });
+    // Use access token to fetch user details from Google
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({ access_token });
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    const userInfo = await oauth2.userinfo.get();
+
+    const { id, email, given_name, picture } = userInfo.data;
+
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      {
+        googleId: id,
+        email: email,
+        name: given_name,
+        image: picture,
+        isEmailConfirmed: true,
+      },
+      { upsert: true, new: true },
+    );
+
+    this.createAndSendToken(user, 201, res);
   });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(

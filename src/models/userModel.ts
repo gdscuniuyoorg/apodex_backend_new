@@ -11,6 +11,7 @@ enum UserRole {
 export interface IUser extends Document {
   name: String;
   email: string;
+  image: string;
   password: string;
   passwordConfirm: string | undefined;
   passwordResetAt: Date;
@@ -37,6 +38,7 @@ const userSchema = new mongoose.Schema<IUser>(
       trim: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
+    image: String,
     password: {
       type: String,
       required: [true, 'User must have a password'],

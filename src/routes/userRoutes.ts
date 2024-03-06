@@ -10,7 +10,8 @@ router.post('/login', authController.login);
 
 router.get('/google/initiate', authController.googleSignUpInitiate);
 
-router.get('/google/callback', )
+router.get('/google/callback', authController.googleSignUpCallback);
+
 router.post('/refresh', authController.refreshToken);
 
 router.patch('/forgetPassword', authController.forgetPassword);
