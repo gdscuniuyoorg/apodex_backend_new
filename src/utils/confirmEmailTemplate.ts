@@ -6,7 +6,8 @@ const confirmEmailTemplate = (confirmEmailUrl: string): string => {
 
     <p>If you have any questions, simply reply to this email. We'd love to help.</p>
     <p>If you didn’t request this email, there’s nothing to worry about — you can safely ignore it.</p>  
-  </div>`;
+  </div>
+  `;
 };
 
 export default confirmEmailTemplate;

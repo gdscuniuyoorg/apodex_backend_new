@@ -1,5 +1,6 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import ENV from '../env_files';
+import { isNullOrUndefined } from 'util';
 
 interface optionsTypes {
   email: string;

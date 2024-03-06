@@ -8,6 +8,8 @@ import crypto from 'crypto';
 import { ICookieOption, TokenUser } from '../types';
 import confirmEmailTemplate from '../utils/confirmEmailTemplate';
 import ENV from '../env_files';
+import querystring from 'querystring';
+import axios from 'axios';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -54,15 +56,66 @@ class AuthController {
   };
 
   //   signup or signin with google
-  googleSignUp: RequestHandler = catchAsync(
-    async (req, res, next): Promise<void> => {},
+  googleSignUpInitiate: RequestHandler = catchAsync(
+    async (req, res, next): Promise<void> => {
+      const clientId = ENV.GOOGLE_CLIENT_ID;
+      const redirectUri = ENV.GOOGLE_REDIRECT_URI;
+      const scopes = ['email', 'profile']; // Define desired scopes
+
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&redirect_uri=${redirectUri}` +
+        `&response_type=code&scope=${scopes.join('+')}`;
+
+      // Return the URL to frontend
+      res.status(200).json({ url: authUrl, status: 'success' });
+    },
   );
+
+  googleSignUpCallback: RequestHandler = catchAsync(async (req, res, next) => {
+    const { code } = req.query;
+
+    // Exchange authorization code for access token
+    const clientId = 'YOUR_CLIENT_ID';
+    const clientSecret = 'YOUR_CLIENT_SECRET';
+    const redirectUri = 'YOUR_REDIRECT_URI';
+
+    const tokenUrl = 'https://oauth2.googleapis.com/token';
+    const params: any = {
+      code,
+      client_id: ENV.GOOGLE_CLIENT_ID,
+      client_secret: ENV.GOOGLE_CLIENT_SECRET,
+      redirect_uri: ENV.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code',
+    };
+
+    try {
+      const response = await axios.post(
+        tokenUrl,
+        querystring.stringify(params),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+
+      const accessToken = response.data.access_token;
+
+      // Return access token to frontend
+      res.send({ accessToken });
+    } catch (error) {
+      console.error(
+        'Error exchanging authorization code for access token:',
+        error,
+      );
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(
     async (req, res, next) => {
       const { confirmEmailToken } = req.params;
-
-      console.log(confirmEmailTemplate)
 
       const user: IUser | null = await User.findOne({
         confirmEmailToken,
@@ -74,7 +127,7 @@ class AuthController {
       user.isEmailConfirmed = true;
       user.save({ validateBeforeSave: false });
 
-      res.redirect('localhost:3000/home');
+      res.redirect('https://localhost:3000/home');
     },
   );
 
