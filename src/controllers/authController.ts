@@ -75,11 +75,6 @@ class AuthController {
   googleSignUpCallback: RequestHandler = catchAsync(async (req, res, next) => {
     const { code } = req.query;
 
-    // Exchange authorization code for access token
-    const clientId = 'YOUR_CLIENT_ID';
-    const clientSecret = 'YOUR_CLIENT_SECRET';
-    const redirectUri = 'YOUR_REDIRECT_URI';
-
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     const params: any = {
       code,
@@ -89,28 +84,15 @@ class AuthController {
       grant_type: 'authorization_code',
     };
 
-    try {
-      const response = await axios.post(
-        tokenUrl,
-        querystring.stringify(params),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
-      );
+    const response = await axios.post(tokenUrl, querystring.stringify(params), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
 
-      const accessToken = response.data.access_token;
+    const accessToken = response.data.access_token;
 
-      // Return access token to frontend
-      res.send({ accessToken });
-    } catch (error) {
-      console.error(
-        'Error exchanging authorization code for access token:',
-        error,
-      );
-      res.status(500).send('Internal Server Error');
-    }
+    res.status(200).json({ response });
   });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(
