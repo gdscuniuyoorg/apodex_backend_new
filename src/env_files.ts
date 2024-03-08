@@ -15,6 +15,7 @@ type IENV = {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_REDIRECT_URI: string;
   GOOGLE_CLIENT_SECRET: string;
+  FRONTEND_URL: string;
 };
 
 const ENV: IENV = {
@@ -31,6 +32,7 @@ const ENV: IENV = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
   GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || '',
+  FRONTEND_URL: process.env.FRONTEND_URL || '',
 };
 
 export default ENV;

@@ -11,6 +11,7 @@ import ENV from '../env_files';
 import querystring from 'querystring';
 import axios from 'axios';
 import { google } from 'googleapis';
+import sendReponse from '../utils/sendResponse';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -23,7 +24,12 @@ class AuthController {
     });
   };
 
-  createAndSendToken = (user: any, statusCode: number, res: Response) => {
+  createAndSendToken = (
+    user: any,
+    statusCode: number,
+    res: Response,
+    sendRes: boolean,
+  ) => {
     const token = this.signToken({ id: user.id, email: user.email });
     const refreshToken = this.signToken({ id: user.id }, true);
     const cookieExpireTime = ENV.JWT_COOKIE_EXPIRES_IN;
@@ -38,6 +44,10 @@ class AuthController {
         Date.now() + parseFloat(cookieExpireTime) * 24 * 60 * 60 * 1000,
       ),
       httpOnly: true,
+      domain: 'localhost',
+      path: '/',
+      sameSite: 'lax',
+      secure: false,
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
@@ -48,12 +58,14 @@ class AuthController {
     // this makes the password and active not show in the response it send to the browser
     user.password = undefined;
 
-    res.status(statusCode).json({
-      status: 'success',
-      token,
-      refreshToken,
-      user,
-    });
+    if (sendRes) {
+      return res.status(statusCode).json({
+        status: 'success',
+        token,
+        refreshToken,
+        user,
+      });
+    }
   };
 
   //   signup or signin with google
@@ -91,29 +103,29 @@ class AuthController {
       },
     });
 
-    const { access_token } = response.data;
+    const { id_token } = response.data;
 
-    // Use access token to fetch user details from Google
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({ access_token });
-    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-    const userInfo = await oauth2.userinfo.get();
+    const { email, email_verified, picture, name } = jwt.decode(
+      id_token,
+    ) as JwtPayload;
 
-    const { id, email, given_name, picture } = userInfo.data;
+    if (!email_verified) {
+      return next(new AppError('Google account is not verified', 403));
+    }
 
     const user = await User.findOneAndUpdate(
       { email: email },
       {
-        googleId: id,
         email: email,
-        name: given_name,
+        name: name,
         image: picture,
         isEmailConfirmed: true,
       },
       { upsert: true, new: true },
     );
 
-    this.createAndSendToken(user, 201, res);
+    this.createAndSendToken(user, 201, res, false);
+    res.redirect(ENV.FRONTEND_URL);
   });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(
@@ -130,7 +142,7 @@ class AuthController {
       user.isEmailConfirmed = true;
       user.save({ validateBeforeSave: false });
 
-      res.redirect('https://localhost:3000/home');
+      res.redirect(ENV.FRONTEND_URL);
     },
   );
 
@@ -194,7 +206,7 @@ class AuthController {
       return next(new AppError('User email or password is invalid', 404));
     }
 
-    this.createAndSendToken(user, 201, res);
+    this.createAndSendToken(user, 201, res, true);
   });
 
   forgetPassword: RequestHandler = catchAsync(
