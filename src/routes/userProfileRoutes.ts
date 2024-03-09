@@ -4,10 +4,11 @@ import authController from '../controllers/authController';
 
 const router = Router();
 
-router.use(authController.protect);
 router
   .route('/')
   .get(UserController.getUsers)
-  .patch(UserController.updateProfile);
+  .patch(authController.protect, UserController.updateProfile);
 
 router.route('/:user_id').get(UserController.getProfile);
+
+export default router;

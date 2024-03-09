@@ -42,6 +42,10 @@ class UserController {
         { upsert: true, new: true },
       );
 
+      if (!profile) {
+        return next(new AppError('An error occured fetching userProfile', 400));
+      }
+
       sendReponse(res, 200, profile);
     },
   );
