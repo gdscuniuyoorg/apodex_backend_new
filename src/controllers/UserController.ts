@@ -34,7 +34,7 @@ class UserController {
   );
   getProfile: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
-      const user_id = req.params;
+      const { user_id } = req.params;
 
       let profile = await UserProfile.findOneAndUpdate(
         { user_id },
