@@ -213,7 +213,7 @@ class AuthController {
       const user = await User.findOne({ email });
 
       if (!user) {
-        return next(new AppError('Please, input valid email', 400));
+        return next(new AppError('No record found for this email', 404));
       }
 
       const resetToken = user.sendPasswordResetToken();
