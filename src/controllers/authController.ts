@@ -10,8 +10,6 @@ import confirmEmailTemplate from '../utils/confirmEmailTemplate';
 import ENV from '../env_files';
 import querystring from 'querystring';
 import axios from 'axios';
-import { google } from 'googleapis';
-import sendReponse from '../utils/sendResponse';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -39,19 +37,16 @@ class AuthController {
       return new AppError('Cookie expire time not found', 400);
 
     // set cookie options
-    const cookieOptions: ICookieOption = {
+    const cookieOptions = {
       expires: new Date(
         Date.now() + parseFloat(cookieExpireTime) * 24 * 60 * 60 * 1000,
       ),
-      httpOnly: true,
-      domain: 'localhost',
-      path: '/',
-      sameSite: 'lax',
-      secure: false,
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
-    if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
+    // if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
+
+    res.set('Set-Cookie', [token, refreshToken]);
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
