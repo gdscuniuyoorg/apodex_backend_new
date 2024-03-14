@@ -23,4 +23,6 @@ router.get(
 
 router.patch('/resetPassword/:resetToken', authController.resetPassword);
 
+router.get('/redirect', authController.googleRedirect);
+
 export default router;

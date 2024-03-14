@@ -5,11 +5,12 @@ import catchAsync from '../utils/catchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import sendEmail from '../utils/email';
 import crypto from 'crypto';
-import { ICookieOption, TokenUser } from '../types';
+import { TokenUser } from '../types';
 import confirmEmailTemplate from '../utils/confirmEmailTemplate';
 import ENV from '../env_files';
 import querystring from 'querystring';
 import axios from 'axios';
+import { CookieOptions } from 'express';
 
 export interface CustomRequest extends Request {
   user?: IUser;
@@ -37,16 +38,18 @@ class AuthController {
       return new AppError('Cookie expire time not found', 400);
 
     // set cookie options
-    const cookieOptions = {
-      expires: new Date(
-        Date.now() + parseFloat(cookieExpireTime) * 24 * 60 * 60 * 1000,
-      ),
+    const cookieOptions: CookieOptions = {
+      maxAge: 900000,
+      sameSite: 'lax',
+      domain: 'localhost',
+      httpOnly: true,
+      secure: false,
+      path: '/',
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
     // if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
 
-    res.set('Set-Cookie', [token, refreshToken]);
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
@@ -62,6 +65,16 @@ class AuthController {
       });
     }
   };
+
+  fetchUserDetails: RequestHandler = catchAsync(async (req, res, next) => {
+    const { userId } = req.query;
+
+    const user = await User.findOne({ id: userId });
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
+    this.createAndSendToken(res, 201, res, true);
+  });
 
   //   signup or signin with google
   googleSignUpInitiate: RequestHandler = catchAsync(
@@ -120,7 +133,7 @@ class AuthController {
     );
 
     this.createAndSendToken(user, 201, res, false);
-    res.redirect(ENV.FRONTEND_URL);
+    res.redirect(`${ENV.FRONTEND_URL}`);
   });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(
@@ -137,7 +150,7 @@ class AuthController {
       user.isEmailConfirmed = true;
       user.save({ validateBeforeSave: false });
 
-      res.redirect(ENV.FRONTEND_URL);
+      res.redirect('frontend');
     },
   );
 
@@ -348,6 +361,10 @@ class AuthController {
 
       next();
     });
+
+  googleRedirect: RequestHandler = catchAsync(async (req, res, next) => {
+    res.redirect(ENV.FRONTEND_URL);
+  });
 }
 
 export default new AuthController();

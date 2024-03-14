@@ -11,4 +11,5 @@ router
 
 router.route('/:user_id').get(UserController.getProfile);
 
+
 export default router;

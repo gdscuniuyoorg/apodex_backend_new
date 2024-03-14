@@ -10,11 +10,3 @@ export type TokenUser = {
   password?: string;
 };
 
-export type ICookieOption = {
-  expires?: Date;
-  httpOnly?: boolean;
-  secure?: boolean;
-  domain: string;
-  path: string;
-  sameSite: boolean | 'lax' | 'strict' | 'none';
-};
