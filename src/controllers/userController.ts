@@ -53,8 +53,9 @@ class UserController {
 
   getUsers: RequestHandler = catchAsync(async (req, res, next) => {
     // paginate these response
-    const users = await User.find();
-
+    const users = await User.find().select(
+      '-password -__v -confirmEmailToken -isEmailConfirmed -role',
+    );
     if (!users) {
       return next(new AppError('User profiles does not exist', 404));
     }

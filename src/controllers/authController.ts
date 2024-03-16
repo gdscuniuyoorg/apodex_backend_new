@@ -55,6 +55,7 @@ class AuthController {
 
     // this makes the password and active not show in the response it send to the browser
     user.password = undefined;
+    user.confirmEmailToken = undefined;
 
     if (sendRes) {
       return res.status(statusCode).json({
