@@ -48,7 +48,7 @@ class AuthController {
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
-    // if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
+    if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
 
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
