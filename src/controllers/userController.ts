@@ -4,6 +4,7 @@ import UserProfile from '../models/userProfileModel';
 import AppError from '../utils/appError';
 import { CustomRequest } from './authController';
 import sendReponse from '../utils/sendResponse';
+import User from '../models/userModel';
 
 class UserController {
   updateProfile: RequestHandler = catchAsync(
@@ -52,7 +53,7 @@ class UserController {
 
   getUsers: RequestHandler = catchAsync(async (req, res, next) => {
     // paginate these response
-    const users = await UserProfile.find();
+    const users = await User.find();
 
     if (!users) {
       return next(new AppError('User profiles does not exist', 404));
