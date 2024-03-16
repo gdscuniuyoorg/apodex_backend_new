@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon dist/server.js",
-    "start:prod": "set NODE_ENV=production && tsc && node --max-old-space-size=4096 dist/server.js"
+    "start:prod": "set NODE_ENV=production && tsc && node dist/server.js"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",

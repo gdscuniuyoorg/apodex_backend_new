@@ -51,7 +51,6 @@ class UserController {
   );
 
   getUsers: RequestHandler = catchAsync(async (req, res, next) => {
-    console.log(req.headers);
     // paginate these response
     const users = await UserProfile.find();
 
