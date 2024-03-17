@@ -9,7 +9,8 @@ enum UserRole {
 }
 
 export interface IUser extends Document {
-  name: String;
+  firstName: String;
+  lastName: string;
   email: string;
   image: string;
   password: string;
@@ -26,11 +27,25 @@ export interface IUser extends Document {
   checkPasswordChange: (time: number) => boolean;
   confirmEmailToken: string;
   checkConfirmEmailToken: () => string;
+
+  // user profile information
+  bio?: string;
+  coverPhotoUrl?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  techInterests?: string[];
+  currentRole?: string;
+  company?: string;
+  apodexImgUrl?: string;
+  twitterUrl?: string;
+  portfolioUrl: string;
+  linkedInUrl?: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    name: { type: String, required: [true, 'User must have a name'] },
+    firstName: { type: String, required: [true, 'User must have a firstName'] },
+    lastName: { type: String, required: [true, 'User must have a lastName'] },
     email: {
       type: String,
       required: [true, 'User must have an email'],
@@ -68,13 +83,24 @@ const userSchema = new mongoose.Schema<IUser>(
     passwordResetAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpireTime: Date,
+
+    // user profile information
+    bio: String,
+    coverPhotoUrl: String,
+    dateOfBirth: Date,
+    techInterests: [String],
+    currentRole: String,
+    company: String,
+    apodexImgUrl: String,
+    twitterUrl: String,
+    portfolioUrl: String,
+    linkedInUrl: String,
   },
 
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-    versionKey: false,
   },
 );
 

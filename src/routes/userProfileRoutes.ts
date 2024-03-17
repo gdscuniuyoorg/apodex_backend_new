@@ -1,15 +1,24 @@
 import { Router } from 'express';
-import UserController from '../controllers/userController';
+import userController from '../controllers/userController';
 import authController from '../controllers/authController';
 
 const router = Router();
 
 router
   .route('/')
-  .get(UserController.getUsers)
-  .patch(authController.protect, UserController.updateProfile);
+  .get(userController.getUsers)
+  .patch(userController.updateProfile);
 
-router.route('/:user_id').get(UserController.getProfile);
+router
+  .route('/:user_id')
+  .get(userController.getProfile)
+  .patch(userController.uploadProfileImage);
 
+router.patch(
+  '/image',
+  authController.protect,
+  userController.uploadProfileImage,
+  userController.updateProfile,
+);
 
 export default router;
