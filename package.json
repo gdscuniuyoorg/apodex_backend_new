@@ -30,7 +30,7 @@
     "nodemailer": "^6.9.11",
     "nodemon": "^3.1.0",
     "querystring": "^0.2.1",
-    "sharp": "^0.33.2",
+    "sharp": "^0.33.2 --ignore-engines",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "validator": "^13.11.0",
