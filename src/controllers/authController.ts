@@ -156,11 +156,9 @@ class AuthController {
   );
 
   signup: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
-    const { firstName, lastName, email, password, passwordConfirm, role } =
+    const {email, password, passwordConfirm, role } =
       req.body;
     const user: IUser = await User.create({
-      firstName,
-      lastName,
       email,
       password,
       passwordConfirm,
@@ -190,11 +188,7 @@ class AuthController {
         html,
       });
 
-      res.status(201).json({
-        status: 'success',
-        email: user.email,
-        message: 'Email Confirmation token sent successfully',
-      });
+     this.createAndSendToken(user, 201, res, true)
     } catch (err: any) {
       res.status(400).json({
         message: err.message || 'There was an error sending email, try again',
