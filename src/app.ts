@@ -7,6 +7,7 @@ import globalErrorHandler from './controllers/errorController';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import morgan from 'morgan';
 
 const app = express();
 
@@ -20,6 +21,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // set security http
 app.use(helmet());
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
 //including global middleware
 
 const limiter = rateLimit({
