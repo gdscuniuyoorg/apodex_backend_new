@@ -5,6 +5,7 @@ import AppError from '../utils/appError';
 import sendReponse from '../utils/sendResponse';
 import User from '../models/userModel';
 import filterObj, { keysToExtract } from '../utils/filterObj';
+import sharp from 'sharp';
 
 class UserController {
   // constructor() {}
@@ -61,6 +62,26 @@ class UserController {
 
     sendReponse(res, 200, users);
   });
+
+  resizePhoto: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      if (!req.file) return next();
+
+      // always set the filename
+      req.file.filename = `user-${req.user?.id}-${Date.now()}.jpeg`;
+
+      sharp(req.file.buffer)
+        // sets the size to height and width
+        .resize(500, 500)
+        // sets the format based on the size
+        .toFormat('jpeg')
+        // sets the quality
+        .jpeg({ quality: 90 })
+        .toFile(`./public/img/users/${req.file.filename}`);
+
+      next();
+    },
+  );
 }
 
 export default new UserController();

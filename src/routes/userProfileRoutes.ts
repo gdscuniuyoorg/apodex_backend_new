@@ -7,15 +7,18 @@ import AppError from '../utils/appError';
 
 const router = Router();
 
-const multerStorage = multer.diskStorage({
-  destination(req: CustomRequest, file, callback) {
-    callback(null, 'public/img/users');
-  },
-  filename(req: CustomRequest, file, callback) {
-    const extension = file.mimetype.split('/')[1];
-    callback(null, `user-${req.user?.id}-${Date.now()}.${extension}`);
-  },
-});
+// const multerStorage = multer.diskStorage({
+//   destination(req: CustomRequest, file, callback) {
+//     callback(null, 'public/img/users');
+//   },
+//   filename(req: CustomRequest, file, callback) {
+//     const extension = file.mimetype.split('/')[1];
+//     callback(null, `user-${req.user?.id}-${Date.now()}.${extension}`);
+//   },
+// });
+
+// the memory storage saves the file in memory until the manupulation with sharp is done, and it is saved as a buffer
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (
   req: CustomRequest,
@@ -46,6 +49,7 @@ router.patch(
   '/image',
   authController.protect,
   upload.single('photo'),
+  userController.resizePhoto,
   userController.updateProfile,
 );
 
