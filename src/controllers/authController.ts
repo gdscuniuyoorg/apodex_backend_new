@@ -48,13 +48,14 @@ class AuthController {
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
-    // if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
+    if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
 
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
     // this makes the password and active not show in the response it send to the browser
     user.password = undefined;
+    user.confirmEmailToken = undefined;
 
     if (sendRes) {
       return res.status(statusCode).json({
@@ -113,9 +114,8 @@ class AuthController {
 
     const { id_token } = response.data;
 
-    const { email, email_verified, picture, name } = jwt.decode(
-      id_token,
-    ) as JwtPayload;
+    const { email, email_verified, picture, given_name, family_name } =
+      jwt.decode(id_token) as JwtPayload;
 
     if (!email_verified) {
       return next(new AppError('Google account is not verified', 403));
@@ -125,7 +125,8 @@ class AuthController {
       { email: email },
       {
         email: email,
-        name: name,
+        firstName: given_name,
+        lastName: family_name,
         image: picture,
         isEmailConfirmed: true,
       },
@@ -155,9 +156,11 @@ class AuthController {
   );
 
   signup: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
-    const { name, email, password, passwordConfirm, role } = req.body;
+    const { firstName, lastName, email, password, passwordConfirm, role } =
+      req.body;
     const user: IUser = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password,
       passwordConfirm,
@@ -189,6 +192,7 @@ class AuthController {
 
       res.status(201).json({
         status: 'success',
+        email: user.email,
         message: 'Email Confirmation token sent successfully',
       });
     } catch (err: any) {
@@ -292,6 +296,8 @@ class AuthController {
     async (req: CustomRequest, res, next): Promise<void> => {
       // check the headers bearer token
       let token: string | undefined;
+
+      console.log('protecting');
 
       if (
         req.headers.authorization &&
