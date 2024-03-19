@@ -3,7 +3,7 @@ import User, { IUser } from '../models/userModel';
 import AppError from '../utils/appError';
 import catchAsync from '../utils/catchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import sendEmail from '../utils/email';
+import Email from '../utils/email';
 import crypto from 'crypto';
 import { TokenUser } from '../types';
 import confirmEmailTemplate from '../utils/confirmEmailTemplate';
@@ -156,8 +156,7 @@ class AuthController {
   );
 
   signup: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
-    const {email, password, passwordConfirm, role } =
-      req.body;
+    const { email, password, passwordConfirm, role } = req.body;
     const user: IUser = await User.create({
       email,
       password,
@@ -176,26 +175,15 @@ class AuthController {
     user.confirmEmailToken = confirmEmailToken;
     await user.save({ validateBeforeSave: false });
 
+    /* 
+    I am holding off on sending emails for the time being
     const confirmEmailUrl = `${req.protocol}://${req.get(
       'host',
     )}/api/v1/users/confirmEmail/${confirmEmailToken}`;
 
-    const html = confirmEmailTemplate(confirmEmailUrl);
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Email Confirmation',
-        html,
-      });
-
-     this.createAndSendToken(user, 201, res, true)
-    } catch (err: any) {
-      res.status(400).json({
-        message: err.message || 'There was an error sending email, try again',
-        status: 'error',
-        error: err,
-      });
-    }
+    await new Email(user, confirmEmailUrl).sendVerifyAndWelcome()
+   */
+    this.createAndSendToken(user, 201, res, true);
   });
 
   login: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
@@ -230,18 +218,12 @@ class AuthController {
       const resetToken = user.sendPasswordResetToken();
       await user.save({ validateBeforeSave: false });
 
-      const resetUrl = `${req.protocol}://${req.get(
-        'host',
-      )}/api/v1/user/resetPassword/${resetToken}`;
-
-      const message = `Forget your password, Visit this link to reset your password : ${resetUrl} \nIf you didnt forget your password, ignore this email`;
-
       try {
-        await sendEmail({
-          email: user.email,
-          subject: 'Reset Password',
-          message,
-        });
+        const resetUrl = `${req.protocol}://${req.get(
+          'host',
+        )}/api/v1/user/resetPassword/${resetToken}`;
+
+        await new Email(user, resetUrl).sendPasswordReset();
 
         res.status(201).json({
           status: 'success',
