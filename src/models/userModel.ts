@@ -9,7 +9,7 @@ enum UserRole {
 }
 
 export interface IUser extends Document {
-  firstName: String;
+  firstName: string;
   lastName: string;
   email: string;
   image: string;
@@ -36,7 +36,6 @@ export interface IUser extends Document {
   techInterests?: string[];
   currentRole?: string;
   company?: string;
-  apodexImgUrl?: string;
   twitterUrl?: string;
   portfolioUrl: string;
   linkedInUrl?: string;
@@ -44,8 +43,6 @@ export interface IUser extends Document {
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    firstName: { type: String, required: [true, 'User must have a firstName'] },
-    lastName: { type: String, required: [true, 'User must have a lastName'] },
     email: {
       type: String,
       required: [true, 'User must have an email'],
@@ -91,7 +88,6 @@ const userSchema = new mongoose.Schema<IUser>(
     techInterests: [String],
     currentRole: String,
     company: String,
-    apodexImgUrl: String,
     twitterUrl: String,
     portfolioUrl: String,
     linkedInUrl: String,

@@ -43,8 +43,8 @@ class ErrorController {
   };
 
   // HANDLE PRODUCTION ERROR
-  sendProdError = (err: AppErrorTypes, res: Response) => {
-    console.log(err);
+  sendProdError = (error: AppErrorTypes, res: Response) => {
+    const err = Object.assign(error);
     if (err.isOperational) {
       res.status(err.statusCode).json({
         status: err.status,
@@ -76,7 +76,9 @@ class ErrorController {
   };
 
   handleDuplicateFieldsDB = (err: AppErrorTypes) => {
-    const value = err.ermsg ? err.ermsg.match(/(["'])(\\?.)*?\1/)![0] : null;
+    const value = err.message
+      ? err.message.match(/(["'])(\\?.)*?\1/)![0]
+      : null;
 
     return new AppError(
       `Duplicate field value: ${value}. Please use another value!`,
