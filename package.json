@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon dist/server.js",
-    "start:prod": "set NODE_ENV=production && tsc &&  node dist/server.js "
+    "start:prod": "set NODE_ENV=production && tsc &&  node dist/server.js"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -26,13 +26,14 @@
     "helmet": "^7.1.0",
     "hpp": "^0.2.3",
     "html-to-text": "^9.0.5",
+    "imagemin": "^8.0.1",
+    "imagemin-jpegtran": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.11",
     "nodemon": "^3.1.0",
     "pug": "^3.0.2",
     "querystring": "^0.2.1",
-    "sharp": "^0.33.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "validator": "^13.11.0",
@@ -41,6 +42,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/html-to-text": "^9.0.4",
+    "@types/imagemin": "^8.0.5",
+    "@types/imagemin-jpegtran": "^5.0.4",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/pug": "^2.0.10",
     "eslint": "^8.57.0",
