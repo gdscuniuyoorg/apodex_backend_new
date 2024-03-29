@@ -5,8 +5,11 @@ import AppError from '../utils/appError';
 import sendReponse from '../utils/sendResponse';
 import User from '../models/userModel';
 import filterObj, { keysToExtract } from '../utils/filterObj';
-import sharp from 'sharp';
 
+import imagemin from 'imagemin';
+import imageminJpegtran from 'imagemin-jpegtran';
+
+import fs from 'fs';
 class UserController {
   // constructor() {}
   updateProfile: RequestHandler = catchAsync(
@@ -73,17 +76,24 @@ class UserController {
       // always set the filename
       req.file.filename = `user-${req.user?.id}-${Date.now()}.jpeg`;
 
-      sharp(req.file.buffer)
-        // sets the size to height and width
-        .resize(500, 500)
-        // sets the format based on the size
-        .toFormat('jpeg')
-        // sets the quality
-        .jpeg({ quality: 90 })
-
-        .toFile(`./public/img/users/${req.file.filename}`);
-
-      next();
+      await imagemin
+        .buffer(req.file.buffer, {
+          plugins: [imageminJpegtran({ progressive: true })],
+        })
+        .then((buffer) => {
+          // Write the buffer to a file
+          fs.writeFile(
+            `./public/img/users/${req?.file?.filename}`,
+            buffer,
+            (err) => {
+              if (err) {
+                console.error('Error writing file:', err);
+                return next(err);
+              }
+              next();
+            },
+          );
+        });
     },
   );
 }
