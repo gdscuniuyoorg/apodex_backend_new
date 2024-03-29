@@ -21,7 +21,10 @@ class UserController {
 
       // filter body properly
       const filterBody = filterObj(req.body, keysToExtract);
-      if (req.file) filterBody.image = req.file.filename;
+      if (req.file)
+        filterBody.image = `${req.protocol}://${req.get(
+          'host',
+        )}/public/img/users/${req.file.filename}`;
 
       const profile = await User.findOneAndUpdate(
         { _id: id },
@@ -77,6 +80,7 @@ class UserController {
         .toFormat('jpeg')
         // sets the quality
         .jpeg({ quality: 90 })
+
         .toFile(`./public/img/users/${req.file.filename}`);
 
       next();
