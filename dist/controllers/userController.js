@@ -40,7 +40,6 @@ const appError_1 = __importDefault(require("../utils/appError"));
 const sendResponse_1 = __importDefault(require("../utils/sendResponse"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const filterObj_1 = __importStar(require("../utils/filterObj"));
-const sharp_1 = __importDefault(require("sharp"));
 class UserController {
     constructor() {
         // constructor() {}
@@ -83,14 +82,14 @@ class UserController {
                 return next();
             // always set the filename
             req.file.filename = `user-${(_b = req.user) === null || _b === void 0 ? void 0 : _b.id}-${Date.now()}.jpeg`;
-            (0, sharp_1.default)(req.file.buffer)
-                // sets the size to height and width
-                .resize(500, 500)
-                // sets the format based on the size
-                .toFormat('jpeg')
-                // sets the quality
-                .jpeg({ quality: 90 })
-                .toFile(`./public/img/users/${req.file.filename}`);
+            // sharp(req.file.buffer)
+            //   // sets the size to height and width
+            //   .resize(500, 500)
+            //   // sets the format based on the size
+            //   .toFormat('jpeg')
+            //   // sets the quality
+            //   .jpeg({ quality: 90 })
+            //   .toFile(`./public/img/users/${req.file.filename}`);
             next();
         }));
     }
