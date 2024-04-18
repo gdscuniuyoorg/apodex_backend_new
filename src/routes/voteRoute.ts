@@ -3,6 +3,10 @@ import voteController from '../controllers/voteController';
 
 const router = Router();
 
-router.route('/').get(voteController.getAllVotes);
+router.get('/:challengeId', voteController.getAllVotes);
 
-router.post('/:challangeId/:teamId', voteController.addVote)
+router
+  .route('/:challangeId/:teamId')
+  .get(voteController.getVoteByTeam)
+  .post(voteController.addVote)
+  .delete(voteController.deleteVote);

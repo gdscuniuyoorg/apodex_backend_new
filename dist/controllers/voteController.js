@@ -44,7 +44,15 @@ class VoteController {
         }));
         // Delete a vote
         this.deleteVote = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            yield voteModel_1.default.findByIdAndDelete(req.params.id);
+            var _b;
+            const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+            const { teamId, challangeId } = req.params;
+            const vote = yield voteModel_1.default.findOne({ userId, teamId, challangeId });
+            if (!vote) {
+                return next(new appError_1.default('Vote has not been casted yet, vote', 404));
+            }
+            // if vote is found, delete it
+            yield voteModel_1.default.findByIdAndDelete(vote._id);
             res.status(204).json({
                 status: 'success',
                 data: null,
@@ -52,25 +60,47 @@ class VoteController {
         }));
         // Get a single vote by ID
         this.getVoteByTeam = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const vote = yield voteModel_1.default.findById(req.params.id);
-            if (!vote) {
-                return next(new appError_1.default('Vote not found', 404));
+            const { teamId, challangeId } = req.params;
+            const votes = yield voteModel_1.default.find({ teamId, challangeId });
+            if (!votes) {
+                return next(new appError_1.default('Votes not found', 404));
             }
             res.status(200).json({
                 status: 'success',
                 data: {
-                    vote,
+                    votes,
                 },
             });
         }));
         // Get all votes
         this.getAllVotes = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const votes = yield voteModel_1.default.find();
+            const { challangeId } = req.params;
+            const votes = yield voteModel_1.default.find({ challangeId });
+            console.log(votes);
+            const groupedVotes = yield voteModel_1.default.aggregate([
+                {
+                    $match: { challangeId },
+                },
+                {
+                    $group: {
+                        _id: '$teamId',
+                        votes: { $push: '$$ROOT' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'ChallangeTeam', // The collection to join
+                        localField: '_id', // Field from the current collection (Vote) to match
+                        foreignField: '_id', // Field from the joined collection (ChallangeTeam) to match
+                        as: 'teamInfo', // Output array field name
+                    },
+                },
+            ]);
+            // break votes into teams and send the different arrays of the teams
             res.status(200).json({
                 status: 'success',
-                results: votes.length,
                 data: {
-                    votes,
+                    votes: groupedVotes,
                 },
             });
         }));

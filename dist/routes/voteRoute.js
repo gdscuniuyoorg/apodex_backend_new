@@ -6,5 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const voteController_1 = __importDefault(require("../controllers/voteController"));
 const router = (0, express_1.Router)();
-router.route('/').get(voteController_1.default.getAllVotes);
-router.post('/:challangeId/:teamId', voteController_1.default.addVote);
+router.get('/:challengeId', voteController_1.default.getAllVotes);
+router
+    .route('/:challangeId/:teamId')
+    .get(voteController_1.default.getVoteByTeam)
+    .post(voteController_1.default.addVote)
+    .delete(voteController_1.default.deleteVote);

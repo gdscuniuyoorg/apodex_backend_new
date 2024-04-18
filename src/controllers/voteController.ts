@@ -41,36 +41,75 @@ class VoteController {
   );
 
   // Delete a vote
-  deleteVote: RequestHandler = catchAsync(async (req, res, next) => {
-    await Vote.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  });
+  deleteVote: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const userId = req.user?.id;
+      const { teamId, challangeId } = req.params;
+
+      const vote = await Vote.findOne({ userId, teamId, challangeId });
+
+      if (!vote) {
+        return next(new AppError('Vote has not been casted yet, vote', 404));
+      }
+
+      // if vote is found, delete it
+      await Vote.findByIdAndDelete(vote._id);
+      res.status(204).json({
+        status: 'success',
+        data: null,
+      });
+    },
+  );
 
   // Get a single vote by ID
   getVoteByTeam: RequestHandler = catchAsync(async (req, res, next) => {
-    const vote = await Vote.findById(req.params.id);
-    if (!vote) {
-      return next(new AppError('Vote not found', 404));
+    const { teamId, challangeId } = req.params;
+    const votes = await Vote.find({ teamId, challangeId });
+    if (!votes) {
+      return next(new AppError('Votes not found', 404));
     }
     res.status(200).json({
       status: 'success',
       data: {
-        vote,
+        votes,
       },
     });
   });
 
   // Get all votes
   getAllVotes: RequestHandler = catchAsync(async (req, res, next) => {
-    const votes = await Vote.find();
+    const { challangeId } = req.params;
+
+    const votes: IVote[] = await Vote.find({ challangeId });
+
+    console.log(votes);
+
+    const groupedVotes = await Vote.aggregate([
+      {
+        $match: { challangeId },
+      },
+      {
+        $group: {
+          _id: '$teamId',
+          votes: { $push: '$$ROOT' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'ChallangeTeam', // The collection to join
+          localField: '_id', // Field from the current collection (Vote) to match
+          foreignField: '_id', // Field from the joined collection (ChallangeTeam) to match
+          as: 'teamInfo', // Output array field name
+        },
+      },
+    ]);
+
+    // break votes into teams and send the different arrays of the teams
+
     res.status(200).json({
       status: 'success',
-      results: votes.length,
       data: {
-        votes,
+        votes: groupedVotes,
       },
     });
   });
