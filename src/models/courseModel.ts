@@ -1,4 +1,4 @@
-import mongoose, { Document, mongo } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 export interface ICourse extends Document {
   name: string;
