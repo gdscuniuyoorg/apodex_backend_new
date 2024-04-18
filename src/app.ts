@@ -1,13 +1,20 @@
 import express, { Response, Request, NextFunction } from 'express';
 import AppError from './utils/appError';
 import cors from 'cors';
-import userRoutes from './routes/userRoutes';
-import profileRoutes from './routes/userProfileRoutes';
+
 import globalErrorHandler from './controllers/errorController';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import morgan from 'morgan';
+
+// importing routes
+import userRoutes from './routes/userRoutes';
+import profileRoutes from './routes/userProfileRoutes';
+import teamRoutes from './routes/challengeTeamRoute';
+import voteRoutes from './routes/voteRoute';
+import challengeRoutes from './routes/challengeRoute';
+import courseRoutes from './routes/courseRoute';
 
 const app = express();
 
@@ -40,6 +47,10 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
+app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/challanges', challengeRoutes);
+app.use('/api/v1/votes', voteRoutes);
+app.use('/api/v1/teams', teamRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
