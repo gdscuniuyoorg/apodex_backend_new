@@ -15,28 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const voteModel_1 = __importDefault(require("../models/voteModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
+const challengeTeamModel_1 = __importDefault(require("../models/challengeTeamModel"));
 class VoteController {
     constructor() {
         // Add a new vote
         this.addVote = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const newVote = yield voteModel_1.default.create(req.body);
+            var _a;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            const { teamId, challangeId } = req.params;
+            //   check if team exist
+            const team = yield challengeTeamModel_1.default.findOne({ _id: teamId });
+            if (!team) {
+                return next(new appError_1.default('Team does not exist', 404));
+            }
+            let vote = yield voteModel_1.default.findOne({ userId, teamId, challangeId });
+            if (vote) {
+                vote = yield voteModel_1.default.findOneAndUpdate({ userId, teamId, challangeId }, { $set: { userId, teamId, challangeId } }, { new: true, runValidators: true });
+            }
+            else {
+                vote = yield voteModel_1.default.create({ teamId, userId, challangeId });
+            }
             res.status(201).json({
                 status: 'success',
                 data: {
-                    vote: newVote,
-                },
-            });
-        }));
-        // Update an existing vote
-        this.updateVote = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const updatedVote = yield voteModel_1.default.findByIdAndUpdate(req.params.id, req.body, {
-                new: true,
-                runValidators: true,
-            });
-            res.status(200).json({
-                status: 'success',
-                data: {
-                    vote: updatedVote,
+                    vote,
                 },
             });
         }));

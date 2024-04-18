@@ -2,32 +2,43 @@ import { RequestHandler } from 'express';
 import Vote, { IVote } from '../models/voteModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import { CustomRequest } from './authController';
+import ChallangeTeam from '../models/challengeTeamModel';
 
 class VoteController {
   // Add a new vote
-  addVote: RequestHandler = catchAsync(async (req, res, next) => {
-    const newVote = await Vote.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: {
-        vote: newVote,
-      },
-    });
-  });
+  addVote: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const userId = req.user?.id;
+      const { teamId, challangeId } = req.params;
 
-  // Update an existing vote
-  updateVote: RequestHandler = catchAsync(async (req, res, next) => {
-    const updatedVote = await Vote.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        vote: updatedVote,
-      },
-    });
-  });
+      //   check if team exist
+      const team = await ChallangeTeam.findOne({ _id: teamId });
+
+      if (!team) {
+        return next(new AppError('Team does not exist', 404));
+      }
+
+      let vote = await Vote.findOne({ userId, teamId, challangeId });
+
+      if (vote) {
+        vote = await Vote.findOneAndUpdate(
+          { userId, teamId, challangeId },
+          { $set: { userId, teamId, challangeId } },
+          { new: true, runValidators: true },
+        );
+      } else {
+        vote = await Vote.create({ teamId, userId, challangeId });
+      }
+
+      res.status(201).json({
+        status: 'success',
+        data: {
+          vote,
+        },
+      });
+    },
+  );
 
   // Delete a vote
   deleteVote: RequestHandler = catchAsync(async (req, res, next) => {

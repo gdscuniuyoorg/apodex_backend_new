@@ -15,6 +15,10 @@ const voteSchema = new mongoose_1.default.Schema({
         ref: 'User',
         required: [true, 'A vote must have a userId'],
     },
+    challangeId: {
+        type: mongoose_1.default.Schema.ObjectId,
+        ref: 'Challange',
+    },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

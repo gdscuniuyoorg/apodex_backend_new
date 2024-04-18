@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IVote extends Document {
   teamId: typeof mongoose.Schema.ObjectId;
   userId: typeof mongoose.Schema.ObjectId;
+  challangeId: typeof mongoose.Schema.ObjectId;
 }
 
 const voteSchema = new mongoose.Schema<IVote>(
@@ -17,6 +18,10 @@ const voteSchema = new mongoose.Schema<IVote>(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'A vote must have a userId'],
+    },
+    challangeId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Challange',
     },
   },
 
