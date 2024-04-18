@@ -24,5 +24,5 @@ const voteSchema = new mongoose_1.default.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
 });
-const Vote = mongoose_1.default.model('Course', voteSchema);
+const Vote = mongoose_1.default.model('Vote', voteSchema);
 exports.default = Vote;

@@ -25,5 +25,5 @@ const challangeSchema = new mongoose.Schema<IChallange>(
   },
 );
 
-const Challange = mongoose.model<IChallange>('Course', challangeSchema);
+const Challange = mongoose.model<IChallange>('Challange', challangeSchema);
 export default Challange;

@@ -23,7 +23,7 @@ const challangeTeamSchema = new mongoose.Schema<IChallangeTeam>(
 );
 
 const ChallangeTeam = mongoose.model<IChallangeTeam>(
-  'Course',
+  'Team',
   challangeTeamSchema,
 );
 export default ChallangeTeam;

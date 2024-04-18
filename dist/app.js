@@ -6,13 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const appError_1 = __importDefault(require("./utils/appError"));
 const cors_1 = __importDefault(require("cors"));
-const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
-const userProfileRoutes_1 = __importDefault(require("./routes/userProfileRoutes"));
 const errorController_1 = __importDefault(require("./controllers/errorController"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const path_1 = __importDefault(require("path"));
 const morgan_1 = __importDefault(require("morgan"));
+// importing routes
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const userProfileRoutes_1 = __importDefault(require("./routes/userProfileRoutes"));
+const challengeTeamRoute_1 = __importDefault(require("./routes/challengeTeamRoute"));
+const voteRoute_1 = __importDefault(require("./routes/voteRoute"));
+const challengeRoute_1 = __importDefault(require("./routes/challengeRoute"));
+const courseRoute_1 = __importDefault(require("./routes/courseRoute"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json({ limit: '10kb' }));
@@ -35,6 +40,10 @@ app.use('/public', express_1.default.static(path_1.default.join(__dirname, 'publ
 // hence you cannot use 127.0.0.1:3000/public/overview because express would think of this as a normal route and find a route handler for it
 app.use('/api/v1/users', userRoutes_1.default);
 app.use('/api/v1/profiles', userProfileRoutes_1.default);
+app.use('/api/v1/courses', courseRoute_1.default);
+app.use('/api/v1/challanges', challengeRoute_1.default);
+app.use('/api/v1/votes', voteRoute_1.default);
+app.use('/api/v1/teams', challengeTeamRoute_1.default);
 app.get('/', (req, res) => {
     res.status(200).json({
         message: 'App is running successfully',

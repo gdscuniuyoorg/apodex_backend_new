@@ -15,5 +15,5 @@ const challangeTeamSchema = new mongoose_1.default.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
 });
-const ChallangeTeam = mongoose_1.default.model('Course', challangeTeamSchema);
+const ChallangeTeam = mongoose_1.default.model('Team', challangeTeamSchema);
 exports.default = ChallangeTeam;

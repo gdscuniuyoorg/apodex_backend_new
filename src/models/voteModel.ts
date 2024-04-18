@@ -32,5 +32,5 @@ const voteSchema = new mongoose.Schema<IVote>(
   },
 );
 
-const Vote = mongoose.model<IVote>('Course', voteSchema);
+const Vote = mongoose.model<IVote>('Vote', voteSchema);
 export default Vote;
