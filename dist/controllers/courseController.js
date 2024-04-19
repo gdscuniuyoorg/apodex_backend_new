@@ -18,6 +18,19 @@ const appError_1 = __importDefault(require("../utils/appError"));
 class CourseController {
     constructor() {
         // Add a new course
+        this.getCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log('food');
+            const categories = yield courseModel_1.default.distinct('category');
+            if (!categories) {
+                return next(new appError_1.default('Categories not found', 404));
+            }
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    categories,
+                },
+            });
+        }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const newCourse = yield courseModel_1.default.create(req.body);
             res.status(201).json({

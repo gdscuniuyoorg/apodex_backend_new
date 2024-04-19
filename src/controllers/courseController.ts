@@ -5,6 +5,23 @@ import AppError from '../utils/appError';
 
 class CourseController {
   // Add a new course
+
+  getCategories: RequestHandler = catchAsync(async (req, res, next) => {
+    console.log('food');
+
+    const categories = await Course.distinct('category');
+
+    if (!categories) {
+      return next(new AppError('Categories not found', 404));
+    }
+    res.status(200).json({
+      status: 'success',
+      data: {
+        categories,
+      },
+    });
+  });
+
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
     const newCourse = await Course.create(req.body);
     res.status(201).json({
