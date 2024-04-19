@@ -15,11 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const courseModel_1 = __importDefault(require("../models/courseModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
+const courseModel_2 = require("../models/courseModel");
 class CourseController {
     constructor() {
         // Add a new course
-        this.getCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            console.log('food');
+        this.getAvailableCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const categories = yield courseModel_1.default.distinct('category');
             if (!categories) {
                 return next(new appError_1.default('Categories not found', 404));
@@ -28,6 +28,20 @@ class CourseController {
                 status: 'success',
                 data: {
                     categories,
+                    length: categories.length,
+                },
+            });
+        }));
+        this.getCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const enumToArray = (enumType) => {
+                return Object.keys(enumType).map((key) => enumType[key]);
+            };
+            const categories = enumToArray(courseModel_2.TechnologyCategory);
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    categories,
+                    length: categories.length,
                 },
             });
         }));

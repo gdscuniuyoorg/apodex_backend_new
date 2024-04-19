@@ -8,6 +8,7 @@ const router = (0, express_1.Router)();
 const courseController_1 = __importDefault(require("../controllers/courseController"));
 const authController_1 = __importDefault(require("../controllers/authController"));
 router.get('/categories', courseController_1.default.getCategories);
+router.get('/available-categories', courseController_1.default.getAvailableCategories);
 router
     .route('/')
     .get(courseController_1.default.getAllCourses)

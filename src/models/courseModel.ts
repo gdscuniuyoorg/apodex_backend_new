@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 
-enum TechnologyCategory {
+export enum TechnologyCategory {
   ProgrammingLanguages = 'Programming Languages',
   WebDevelopmentFrameworks = 'Web Development Frameworks',
   MobileAppDevelopment = 'Mobile App Development',

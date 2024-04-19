@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TechnologyCategory = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 var TechnologyCategory;
 (function (TechnologyCategory) {
@@ -18,7 +19,7 @@ var TechnologyCategory;
     TechnologyCategory["GameDevelopment"] = "Game Development";
     TechnologyCategory["TechnicalWriting"] = "Technical Writing";
     TechnologyCategory["DataAnalysis"] = "Data Analysis";
-})(TechnologyCategory || (TechnologyCategory = {}));
+})(TechnologyCategory || (exports.TechnologyCategory = TechnologyCategory = {}));
 const courseSchema = new mongoose_1.default.Schema({
     name: {
         type: String,
