@@ -23,7 +23,27 @@ class CourseController {
   });
 
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    const newCourse = await Course.create(req.body);
+    const {
+      name,
+      category,
+      description,
+      objectives,
+      instructor,
+      videos,
+      materials,
+    } = req.body;
+
+    const newCourse = await Course.create({
+      name,
+      category,
+      description,
+      objectives,
+      instructor,
+      videos,
+      materials,
+    });
+
+    
     res.status(201).json({
       status: 'success',
       data: {

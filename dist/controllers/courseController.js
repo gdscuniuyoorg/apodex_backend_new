@@ -32,7 +32,16 @@ class CourseController {
             });
         }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const newCourse = yield courseModel_1.default.create(req.body);
+            const { name, category, description, objectives, instructor, videos, materials, } = req.body;
+            const newCourse = yield courseModel_1.default.create({
+                name,
+                category,
+                description,
+                objectives,
+                instructor,
+                videos,
+                materials,
+            });
             res.status(201).json({
                 status: 'success',
                 data: {
