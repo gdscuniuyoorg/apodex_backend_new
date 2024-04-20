@@ -2,7 +2,10 @@ import { RequestHandler } from 'express';
 import Challenge from '../models/challengeModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { challengeSchema } from '../helper/challenge.validate';
+import {
+  challengeSchema,
+  updateChallengeSchema,
+} from '../helper/challenge.validate';
 
 class ChallengeController {
   addChallenge: RequestHandler = catchAsync(async (req, res, next) => {
@@ -18,20 +21,32 @@ class ChallengeController {
       )}/public/img/users/${req.file.filename}`;
     }
 
-    const newChallenge = await Challenge.create(value);
+    const challenge = await Challenge.create(value);
 
     res.status(201).json({
       status: 'success',
       data: {
-        challenge: newChallenge,
+        challenge,
       },
     });
   });
 
   updateChallenge: RequestHandler = catchAsync(async (req, res, next) => {
+    const { error, value } = updateChallengeSchema.validate(req.body);
+
+    if (error) {
+      return next(new AppError(error.message, 400));
+    }
+
+    if (req.file) {
+      value.coverPhoto = `${req.protocol}://${req.get(
+        'host',
+      )}/public/img/users/${req.file.filename}`;
+    }
+
     const updatedChallenge = await Challenge.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      value,
       { new: true, runValidators: true },
     );
     res.status(200).json({
@@ -54,6 +69,7 @@ class ChallengeController {
   // Get a single challenge by ID
   getChallenge: RequestHandler = catchAsync(async (req, res, next) => {
     const challenge = await Challenge.findById(req.params.id);
+
     if (!challenge) {
       return next(new AppError('Challenge not found', 404));
     }

@@ -26,16 +26,23 @@ class ChallengeController {
             if (req.file) {
                 value.coverPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
             }
-            const newChallenge = yield challengeModel_1.default.create(value);
+            const challenge = yield challengeModel_1.default.create(value);
             res.status(201).json({
                 status: 'success',
                 data: {
-                    challenge: newChallenge,
+                    challenge,
                 },
             });
         }));
         this.updateChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const updatedChallenge = yield challengeModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+            const { error, value } = challenge_validate_1.updateChallengeSchema.validate(req.body);
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
+            if (req.file) {
+                value.coverPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+            }
+            const updatedChallenge = yield challengeModel_1.default.findByIdAndUpdate(req.params.id, value, { new: true, runValidators: true });
             res.status(200).json({
                 status: 'success',
                 data: {
