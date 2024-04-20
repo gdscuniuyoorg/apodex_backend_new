@@ -15,10 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const challengeModel_1 = __importDefault(require("../models/challengeModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
+const challenge_validate_1 = require("../helper/challenge.validate");
 class ChallengeController {
     constructor() {
         this.addChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const newChallenge = yield challengeModel_1.default.create(req.body);
+            const { error, value } = challenge_validate_1.challengeSchema.validate(req.body);
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
+            if (req.file) {
+                value.coverPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+            }
+            const newChallenge = yield challengeModel_1.default.create(value);
             res.status(201).json({
                 status: 'success',
                 data: {

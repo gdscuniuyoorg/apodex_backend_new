@@ -58,11 +58,11 @@ class CourseController {
             });
         }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error } = course_validate_1.courseValidate.validate(req.body);
+            const { error, value } = course_validate_1.courseValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            const newCourse = yield courseModel_1.default.create(req.body);
+            const newCourse = yield courseModel_1.default.create(value);
             res.status(201).json({
                 status: 'success',
                 data: {
@@ -72,11 +72,14 @@ class CourseController {
         }));
         // Update an existing course
         this.updateCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error } = course_validate_1.updateCourseValidate.validate(req.body);
+            const { error, value } = course_validate_1.updateCourseValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            const updatedCourse = yield courseModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+            const updatedCourse = yield courseModel_1.default.findByIdAndUpdate(req.params.id, value, {
+                new: true,
+                runValidators: true,
+            });
             res.status(200).json({
                 status: 'success',
                 data: {

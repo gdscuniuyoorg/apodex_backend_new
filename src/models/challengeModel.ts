@@ -1,36 +1,57 @@
+import { number } from 'joi';
 import mongoose, { Document } from 'mongoose';
 
-export interface IChallange extends Document {
+export enum ParticipationType {
+  Team = 'Team',
+  Individual = 'Individual',
+}
+
+export interface IChallenge extends Document {
   name: string;
   description: string;
   coverPhoto: string;
-  teams: (typeof mongoose.Schema.ObjectId)[];
+  participationType: ParticipationType;
   startTime: Date;
   endTime: Date;
   rules: string;
+  minTeamParticipants?: number | undefined;
+  maxTeamParticipants?: number | undefined;
+  participants?: (typeof mongoose.Schema.ObjectId)[];
 }
 
-const challangeSchema = new mongoose.Schema<IChallange>(
+const challengeSchema = new mongoose.Schema<IChallenge>(
   {
     name: {
       type: String,
-      required: [true, 'Course must have a name'],
+      required: [true, 'Challenge must have a name'],
     },
     description: String,
     coverPhoto: String,
-    teams: { type: [mongoose.Schema.ObjectId], ref: 'Team' },
+    participationType: {
+      type: String,
+      enum: ParticipationType,
+      default: ParticipationType.Individual,
+    },
+    participants: {
+      type: [
+        {
+          type: mongoose.Schema.ObjectId,
+        },
+      ],
+      default: [],
+    },
     startTime: {
       type: Date,
-      required: [true, 'Challenge must have a Start Time'],
+      required: [true, 'Challenge must have a start time'],
     },
     endTime: {
       type: Date,
-      required: [true, 'Challenge must have an endtime'],
+      required: [true, 'Challenge must have an end time'],
     },
-
     rules: String,
+    minTeamParticipants: Number,
+    maxTeamParticipants: Number,
   },
-
   {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -38,5 +59,13 @@ const challangeSchema = new mongoose.Schema<IChallange>(
   },
 );
 
-const Challange = mongoose.model<IChallange>('Challange', challangeSchema);
-export default Challange;
+challengeSchema.pre('save', async function (this: IChallenge) {
+  const refModel =
+    this.participationType === ParticipationType.Team ? 'Team' : 'User';
+
+  // add ref to participants based on participationType
+  this.schema.paths.participants.options.ref = refModel;
+});
+
+const Challenge = mongoose.model<IChallenge>('Challenge', challengeSchema);
+export default Challenge;

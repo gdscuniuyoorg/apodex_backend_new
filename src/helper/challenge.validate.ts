@@ -1,15 +1,25 @@
 import Joi from 'joi';
 
-export const courseValidate = Joi.object({
+export const challengeSchema = Joi.object({
   name: Joi.string().min(1).required(),
   description: Joi.string().min(1).required(),
-  coverPhoto: Joi.string().min(1).required(),
-  teams: Joi.array().items(Joi.string().min(1)),
+  participants: Joi.array().items(Joi.string().min(1)),
+  participationType: Joi.string().min(1).required(),
+  startTime: Joi.date().iso().required(),
+  endTime: Joi.date().iso().required(),
+  rules: Joi.string().min(1).required(),
+  minTeamParticipants: Joi.number().min(1),
+  maxTeamParticipants: Joi.number().min(1),
 });
 
-export const updateCourseValidate = Joi.object({
+export const updateChallengeSchema = Joi.object({
   name: Joi.string().min(1),
   description: Joi.string().min(1),
-  coverPhoto: Joi.string().min(1),
-  teams: Joi.array().items(Joi.string().min(1)),
+  participants: Joi.array().items(Joi.string().min(1)),
+  participationType: Joi.string().min(1),
+  startTime: Joi.date().iso(),
+  endTime: Joi.date().iso(),
+  rules: Joi.string().min(1),
+  minTeamParticipants: Joi.number().min(1),
+  maxTeamParticipants: Joi.number().min(1),
 });

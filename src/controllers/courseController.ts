@@ -44,13 +44,12 @@ class CourseController {
   });
 
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    const { error } = courseValidate.validate(req.body);
+    const { error, value } = courseValidate.validate(req.body);
 
     if (error) {
       return next(new AppError(error.message, 400));
     }
-
-    const newCourse = await Course.create(req.body);
+    const newCourse = await Course.create(value);
 
     res.status(201).json({
       status: 'success',
@@ -62,17 +61,16 @@ class CourseController {
 
   // Update an existing course
   updateCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    const { error } = updateCourseValidate.validate(req.body);
+    const { error, value } = updateCourseValidate.validate(req.body);
 
     if (error) {
       return next(new AppError(error.message, 400));
     }
 
-    const updatedCourse = await Course.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true },
-    );
+    const updatedCourse = await Course.findByIdAndUpdate(req.params.id, value, {
+      new: true,
+      runValidators: true,
+    });
     res.status(200).json({
       status: 'success',
       data: {
