@@ -7,6 +7,7 @@ import {
   courseValidate,
   updateCourseValidate,
 } from '../helper/course.validate';
+import APIFeatures, { QueryString } from '../utils/apiFeatures';
 
 class CourseController {
   getAvailableCategories: RequestHandler = catchAsync(
@@ -80,9 +81,13 @@ class CourseController {
     });
   });
 
-  // Delete a course
+  // Delete a course by Id
   deleteCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findByIdAndDelete(req.params.id);
+
+    if (!course) {
+      return next(new AppError('Course no found', 404));
+    }
     res.status(204).json({
       status: 'success',
       data: null,
@@ -105,7 +110,21 @@ class CourseController {
 
   // Get all courses
   getAllCourses: RequestHandler = catchAsync(async (req, res, next) => {
-    const courses = await Course.find();
+    const { search, ...queryString } = req.query;
+
+    const features = new APIFeatures(
+      Course.find(),
+      (req.query as QueryString) || {},
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+      .search();
+
+    // populate the instructor field
+    const courses = await features.query.populate('instructor', 'name');
+
     res.status(200).json({
       status: 'success',
       results: courses.length,
