@@ -16,10 +16,9 @@ const courseModel_1 = __importDefault(require("../models/courseModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const courseModel_2 = require("../models/courseModel");
-const course_validate_1 = __importDefault(require("../helper/course.validate"));
+const course_validate_1 = require("../helper/course.validate");
 class CourseController {
     constructor() {
-        // Add a new course
         this.getAvailableCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const categories = yield courseModel_1.default.distinct('category');
             if (!categories) {
@@ -47,8 +46,7 @@ class CourseController {
             });
         }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            // validate course body
-            const { error } = course_validate_1.default.validate(req.body);
+            const { error } = course_validate_1.courseValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
@@ -62,6 +60,10 @@ class CourseController {
         }));
         // Update an existing course
         this.updateCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const { error } = course_validate_1.updateCourseValidate.validate(req.body);
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
             const updatedCourse = yield courseModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
             res.status(200).json({
                 status: 'success',

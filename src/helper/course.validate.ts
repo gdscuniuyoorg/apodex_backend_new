@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const courseValidate = Joi.object({
+export const courseValidate = Joi.object({
   name: Joi.string().min(1).required(),
   category: Joi.string().min(1).required(),
   objectives: Joi.string().min(1).required(),
@@ -10,4 +10,12 @@ const courseValidate = Joi.object({
   materials: Joi.array().items(Joi.string()).optional(),
 });
 
-export default courseValidate;
+export const updateCourseValidate = Joi.object({
+  name: Joi.string().min(1),
+  category: Joi.string().min(1),
+  objectives: Joi.string().min(1),
+  description: Joi.string().min(1),
+  instructor: Joi.string().min(1),
+  videos: Joi.array().items(Joi.string().min(1)),
+  materials: Joi.array().items(Joi.string()),
+});

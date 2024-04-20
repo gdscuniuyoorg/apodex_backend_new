@@ -3,11 +3,12 @@ import Course, { ICourse } from '../models/courseModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import { TechnologyCategory } from '../models/courseModel';
-import courseValidate from '../helper/course.validate';
+import {
+  courseValidate,
+  updateCourseValidate,
+} from '../helper/course.validate';
 
 class CourseController {
-  // Add a new course
-
   getAvailableCategories: RequestHandler = catchAsync(
     async (req, res, next) => {
       const categories = await Course.distinct('category');
@@ -42,7 +43,6 @@ class CourseController {
   });
 
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    // validate course body
     const { error } = courseValidate.validate(req.body);
 
     if (error) {
@@ -61,6 +61,12 @@ class CourseController {
 
   // Update an existing course
   updateCourse: RequestHandler = catchAsync(async (req, res, next) => {
+    const { error } = updateCourseValidate.validate(req.body);
+
+    if (error) {
+      return next(new AppError(error.message, 400));
+    }
+
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
       req.body,
