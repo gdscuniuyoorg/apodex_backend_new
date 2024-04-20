@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (process.env.DB_URL) {
+        if (!process.env.DB_URL) {
             throw new Error('DB url is missing from .env variable');
         }
         yield mongoose_1.default.connect(process.env.DB_URL, {

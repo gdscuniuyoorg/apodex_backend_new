@@ -2,7 +2,7 @@ import mongoose, { ConnectOptions } from 'mongoose';
 
 const connectDB = async (): Promise<void> => {
   try {
-    if (process.env.DB_URL) {
+    if (!process.env.DB_URL) {
       throw new Error('DB url is missing from .env variable');
     }
 

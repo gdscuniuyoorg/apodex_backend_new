@@ -1,4 +1,4 @@
-import { Response, Request, NextFunction, RequestHandler } from 'express';
+import { Response, Request, NextFunction } from 'express';
 import AppError, { AppErrorTypes } from '../utils/appError';
 
 class ErrorController {
