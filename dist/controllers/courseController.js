@@ -97,7 +97,8 @@ class CourseController {
         }));
         // Get a single course by ID
         this.getCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const course = yield courseModel_1.default.findById(req.params.id);
+            const { id } = req.params;
+            const course = yield courseModel_1.default.findOne({ _id: id });
             if (!course) {
                 return next(new appError_1.default('Course not found', 404));
             }

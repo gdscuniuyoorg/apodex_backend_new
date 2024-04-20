@@ -96,10 +96,13 @@ class CourseController {
 
   // Get a single course by ID
   getCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    const course = await Course.findById(req.params.id);
+    const { id } = req.params;
+    const course = await Course.findOne({ _id: id });
+
     if (!course) {
       return next(new AppError('Course not found', 404));
     }
+
     res.status(200).json({
       status: 'success',
       data: {
