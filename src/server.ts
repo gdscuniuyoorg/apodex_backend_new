@@ -1,11 +1,12 @@
-import ENV from "./env_files";
+import dotenv from 'dotenv';
+dotenv.config();
 
-import app from "./app";
-import connectDB from "./db";
+import app from './app';
+import connectDB from './db';
 
 // connect to database
 connectDB();
 
-app.listen(ENV.PORT, () => {
-  console.log(`Server started successfully at port ${ENV.PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server started successfully at port ${process.env.PORT}`);
 });

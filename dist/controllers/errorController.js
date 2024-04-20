@@ -4,17 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const appError_1 = __importDefault(require("../utils/appError"));
-const env_files_1 = __importDefault(require("../env_files"));
 class ErrorController {
-    constructor(env) {
+    constructor() {
         // SEND THE GLOBAL ERROR
         this.globalSendError = (err, req, res, next) => {
             err.statusCode = err.statusCode || 500;
             err.status = err.status || 'error';
-            if (this.env === 'development') {
+            if (process.env.NODE_ENV === 'development') {
                 return this.sendDevError(err, res);
             }
-            if (this.env === 'production') {
+            if (process.env.NODE_ENV === 'production') {
                 let error;
                 if (err.name === 'CastError') {
                     error = this.handleCastErrorDB(err);
@@ -78,8 +77,7 @@ class ErrorController {
         this.hendleJWTError = () => {
             return new appError_1.default('Invalid Token, Please log in again', 401);
         };
-        this.env = env;
     }
 }
-const errorController = new ErrorController(env_files_1.default.NODE_ENV || '');
+const errorController = new ErrorController();
 exports.default = errorController;

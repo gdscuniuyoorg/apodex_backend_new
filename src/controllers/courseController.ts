@@ -3,6 +3,7 @@ import Course, { ICourse } from '../models/courseModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import { TechnologyCategory } from '../models/courseModel';
+import { validateCreateCourse } from '../helper/course.validate';
 
 class CourseController {
   // Add a new course
@@ -41,25 +42,9 @@ class CourseController {
   });
 
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
-    const {
-      name,
-      category,
-      description,
-      objectives,
-      instructor,
-      videos,
-      materials,
-    } = req.body;
-
-    const newCourse = await Course.create({
-      name,
-      category,
-      description,
-      objectives,
-      instructor,
-      videos,
-      materials,
-    });
+    // validate course body
+    validateCreateCourse.parse(req.body);
+    const newCourse = await Course.create(req.body);
 
     res.status(201).json({
       status: 'success',

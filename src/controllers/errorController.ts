@@ -1,13 +1,8 @@
 import { Response, Request, NextFunction, RequestHandler } from 'express';
 import AppError, { AppErrorTypes } from '../utils/appError';
-import ENV from '../env_files';
 
 class ErrorController {
-  env: string;
-
-  constructor(env: string) {
-    this.env = env;
-  }
+  constructor() {}
 
   // SEND THE GLOBAL ERROR
   globalSendError = (
@@ -19,11 +14,11 @@ class ErrorController {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
-    if (this.env === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       return this.sendDevError(err, res);
     }
 
-    if (this.env === 'production') {
+    if (process.env.NODE_ENV === 'production') {
       let error: any;
 
       if (err.name === 'CastError') {
@@ -99,6 +94,6 @@ class ErrorController {
   };
 }
 
-const errorController = new ErrorController(ENV.NODE_ENV || '');
+const errorController = new ErrorController();
 
 export default errorController;

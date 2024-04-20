@@ -16,6 +16,7 @@ const courseModel_1 = __importDefault(require("../models/courseModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const courseModel_2 = require("../models/courseModel");
+const course_validate_1 = require("../helper/course.validate");
 class CourseController {
     constructor() {
         // Add a new course
@@ -46,16 +47,9 @@ class CourseController {
             });
         }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { name, category, description, objectives, instructor, videos, materials, } = req.body;
-            const newCourse = yield courseModel_1.default.create({
-                name,
-                category,
-                description,
-                objectives,
-                instructor,
-                videos,
-                materials,
-            });
+            // validate course body
+            course_validate_1.validateCreateCourse.parse(req.body);
+            const newCourse = yield courseModel_1.default.create(req.body);
             res.status(201).json({
                 status: 'success',
                 data: {
