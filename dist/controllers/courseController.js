@@ -50,7 +50,7 @@ class CourseController {
             // validate course body
             const { error } = course_validate_1.default.validate(req.body);
             if (error) {
-                return next(new appError_1.default(error.details[0].message, 400));
+                return next(new appError_1.default(error.message, 400));
             }
             const newCourse = yield courseModel_1.default.create(req.body);
             res.status(201).json({

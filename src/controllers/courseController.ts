@@ -46,7 +46,7 @@ class CourseController {
     const { error } = courseValidate.validate(req.body);
 
     if (error) {
-      return next(new AppError(error.details[0].message, 400));
+      return next(new AppError(error.message, 400));
     }
 
     const newCourse = await Course.create(req.body);
