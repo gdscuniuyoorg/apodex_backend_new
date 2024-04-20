@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const env_files_1 = __importDefault(require("../env_files"));
 const pug_1 = __importDefault(require("pug"));
 class Email {
     constructor(user, url) {
@@ -23,16 +22,16 @@ class Email {
         this.firstName = user.firstName;
     }
     newTransport() {
-        // if(ENV.NODE_ENV ==='production'){
+        // if(process.env.NODE_ENV ==='production'){
         //   return 1
         // }
         return nodemailer_1.default.createTransport({
-            host: env_files_1.default.EMAIL_HOST,
-            port: +env_files_1.default.EMAIL_PORT,
+            host: process.env.EMAIL_HOST,
+            port: +process.env.EMAIL_PORT,
             secure: false,
             auth: {
-                pass: env_files_1.default.EMAIL_PASSWORD,
-                user: env_files_1.default.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD,
+                user: process.env.EMAIL_USERNAME,
             },
         });
     }

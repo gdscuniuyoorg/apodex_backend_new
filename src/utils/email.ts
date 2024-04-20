@@ -1,8 +1,6 @@
 import nodemailer, { Transporter } from 'nodemailer';
-import ENV from '../env_files';
 import { IUser } from '../models/userModel';
 import pug from 'pug';
-import htmlToText from 'html-to-text';
 
 class Email {
   to: string;
@@ -18,16 +16,16 @@ class Email {
   }
 
   newTransport() {
-    // if(ENV.NODE_ENV ==='production'){
+    // if(process.env.NODE_ENV ==='production'){
     //   return 1
     // }
     return nodemailer.createTransport({
-      host: ENV.EMAIL_HOST,
-      port: +ENV.EMAIL_PORT,
+      host: process.env.EMAIL_HOST,
+      port: +process.env.EMAIL_PORT,
       secure: false,
       auth: {
-        pass: ENV.EMAIL_PASSWORD,
-        user: ENV.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+        user: process.env.EMAIL_USERNAME,
       },
     });
   }
