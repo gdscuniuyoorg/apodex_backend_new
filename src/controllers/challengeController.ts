@@ -4,7 +4,6 @@ import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 
 class ChallengeController {
-  // Add a new challenge
   addChallenge: RequestHandler = catchAsync(async (req, res, next) => {
     const newChallenge = await Challange.create(req.body);
     res.status(201).json({
@@ -15,7 +14,6 @@ class ChallengeController {
     });
   });
 
-  // Update an existing challenge
   updateChallenge: RequestHandler = catchAsync(async (req, res, next) => {
     const updatedChallenge = await Challange.findByIdAndUpdate(
       req.params.id,

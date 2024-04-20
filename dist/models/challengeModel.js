@@ -12,6 +12,15 @@ const challangeSchema = new mongoose_1.default.Schema({
     description: String,
     coverPhoto: String,
     teams: { type: [mongoose_1.default.Schema.ObjectId], ref: 'Team' },
+    startTime: {
+        type: Date,
+        required: [true, 'Challenge must have a Start Time'],
+    },
+    endTime: {
+        type: Date,
+        required: [true, 'Challenge must have an endtime'],
+    },
+    rules: String,
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

@@ -17,7 +17,6 @@ const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 class ChallengeController {
     constructor() {
-        // Add a new challenge
         this.addChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const newChallenge = yield challengeModel_1.default.create(req.body);
             res.status(201).json({
@@ -27,7 +26,6 @@ class ChallengeController {
                 },
             });
         }));
-        // Update an existing challenge
         this.updateChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const updatedChallenge = yield challengeModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
             res.status(200).json({

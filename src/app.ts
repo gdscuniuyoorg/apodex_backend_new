@@ -48,7 +48,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
 app.use('/api/v1/courses', courseRoutes);
-app.use('/api/v1/challanges', challengeRoutes);
+app.use('/api/v1/challenges', challengeRoutes);
 app.use('/api/v1/votes', voteRoutes);
 app.use('/api/v1/teams', teamRoutes);
 

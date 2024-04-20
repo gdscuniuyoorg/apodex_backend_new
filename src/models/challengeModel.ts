@@ -5,6 +5,9 @@ export interface IChallange extends Document {
   description: string;
   coverPhoto: string;
   teams: (typeof mongoose.Schema.ObjectId)[];
+  startTime: Date;
+  endTime: Date;
+  rules: string;
 }
 
 const challangeSchema = new mongoose.Schema<IChallange>(
@@ -16,6 +19,16 @@ const challangeSchema = new mongoose.Schema<IChallange>(
     description: String,
     coverPhoto: String,
     teams: { type: [mongoose.Schema.ObjectId], ref: 'Team' },
+    startTime: {
+      type: Date,
+      required: [true, 'Challenge must have a Start Time'],
+    },
+    endTime: {
+      type: Date,
+      required: [true, 'Challenge must have an endtime'],
+    },
+
+    rules: String,
   },
 
   {

@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import Course, { ICourse } from '../models/courseModel';
+import Course from '../models/courseModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import { TechnologyCategory } from '../models/courseModel';
