@@ -15,10 +15,40 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const courseModel_1 = __importDefault(require("../models/courseModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
+const courseModel_2 = require("../models/courseModel");
+const course_validate_1 = require("../helper/course.validate");
 class CourseController {
     constructor() {
         // Add a new course
+        this.getAvailableCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const categories = yield courseModel_1.default.distinct('category');
+            if (!categories) {
+                return next(new appError_1.default('Categories not found', 404));
+            }
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    categories,
+                    length: categories.length,
+                },
+            });
+        }));
+        this.getCategories = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const enumToArray = (enumType) => {
+                return Object.keys(enumType).map((key) => enumType[key]);
+            };
+            const categories = enumToArray(courseModel_2.TechnologyCategory);
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    categories,
+                    length: categories.length,
+                },
+            });
+        }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            // validate course body
+            course_validate_1.validateCreateCourse.parse(req.body);
             const newCourse = yield courseModel_1.default.create(req.body);
             res.status(201).json({
                 status: 'success',

@@ -4,6 +4,9 @@ const router = Router();
 import courseController from '../controllers/courseController';
 import authController from '../controllers/authController';
 
+router.get('/categories', courseController.getCategories);
+router.get('/available-categories', courseController.getAvailableCategories);
+
 router
   .route('/')
   .get(courseController.getAllCourses)

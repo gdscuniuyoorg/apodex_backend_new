@@ -2,11 +2,50 @@ import { RequestHandler } from 'express';
 import Course, { ICourse } from '../models/courseModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import { TechnologyCategory } from '../models/courseModel';
+import { validateCreateCourse } from '../helper/course.validate';
 
 class CourseController {
   // Add a new course
+
+  getAvailableCategories: RequestHandler = catchAsync(
+    async (req, res, next) => {
+      const categories = await Course.distinct('category');
+
+      if (!categories) {
+        return next(new AppError('Categories not found', 404));
+      }
+      res.status(200).json({
+        status: 'success',
+        data: {
+          categories,
+          length: categories.length,
+        },
+      });
+    },
+  );
+
+  getCategories: RequestHandler = catchAsync(async (req, res, next) => {
+    const enumToArray = (enumType: any): { key: string; value: string }[] => {
+      return Object.keys(enumType).map((key) => enumType[key]);
+    };
+
+    const categories = enumToArray(TechnologyCategory);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        categories,
+        length: categories.length,
+      },
+    });
+  });
+
   addCourse: RequestHandler = catchAsync(async (req, res, next) => {
+    // validate course body
+    validateCreateCourse.parse(req.body);
     const newCourse = await Course.create(req.body);
+
     res.status(201).json({
       status: 'success',
       data: {
