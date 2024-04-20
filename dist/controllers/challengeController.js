@@ -16,6 +16,7 @@ const challengeModel_1 = __importDefault(require("../models/challengeModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const challenge_validate_1 = require("../helper/challenge.validate");
+const apiFeatures_1 = __importDefault(require("../utils/apiFeatures"));
 class ChallengeController {
     constructor() {
         this.addChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -60,7 +61,7 @@ class ChallengeController {
         }));
         // Get a single challenge by ID
         this.getChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const challenge = yield challengeModel_1.default.findById(req.params.id);
+            const challenge = yield challengeModel_1.default.findById(req.params.id).populate('participants');
             if (!challenge) {
                 return next(new appError_1.default('Challenge not found', 404));
             }
@@ -73,7 +74,13 @@ class ChallengeController {
         }));
         // Get all challenges
         this.getAllChallenges = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const challenges = yield challengeModel_1.default.find();
+            const features = new apiFeatures_1.default(challengeModel_1.default.find(), req.query || {})
+                .filter()
+                .sort()
+                .limitFields()
+                .paginate()
+                .search();
+            const challenges = yield features.query;
             res.status(200).json({
                 status: 'success',
                 results: challenges.length,

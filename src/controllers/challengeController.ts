@@ -6,6 +6,7 @@ import {
   challengeSchema,
   updateChallengeSchema,
 } from '../helper/challenge.validate';
+import APIFeatures, { QueryString } from '../utils/apiFeatures';
 
 class ChallengeController {
   addChallenge: RequestHandler = catchAsync(async (req, res, next) => {
@@ -60,6 +61,7 @@ class ChallengeController {
   // Delete a challenge
   deleteChallenge: RequestHandler = catchAsync(async (req, res, next) => {
     await Challenge.findByIdAndDelete(req.params.id);
+
     res.status(204).json({
       status: 'success',
       data: null,
@@ -68,7 +70,9 @@ class ChallengeController {
 
   // Get a single challenge by ID
   getChallenge: RequestHandler = catchAsync(async (req, res, next) => {
-    const challenge = await Challenge.findById(req.params.id);
+    const challenge = await Challenge.findById(req.params.id).populate(
+      'participants',
+    );
 
     if (!challenge) {
       return next(new AppError('Challenge not found', 404));
@@ -83,7 +87,17 @@ class ChallengeController {
 
   // Get all challenges
   getAllChallenges: RequestHandler = catchAsync(async (req, res, next) => {
-    const challenges = await Challenge.find();
+    const features = new APIFeatures(
+      Challenge.find(),
+      (req.query as QueryString) || {},
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+      .search();
+
+    const challenges = await features.query;
     res.status(200).json({
       status: 'success',
       results: challenges.length,

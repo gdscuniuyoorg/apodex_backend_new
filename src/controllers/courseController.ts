@@ -95,7 +95,7 @@ class CourseController {
   // Get a single course by ID
   getCourse: RequestHandler = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const course = await Course.findOne({ _id: id });
+    const course = await Course.findOne({ _id: id }).populate('instructor');
 
     if (!course) {
       return next(new AppError('Course not found', 404));
@@ -111,8 +111,6 @@ class CourseController {
 
   // Get all courses
   getAllCourses: RequestHandler = catchAsync(async (req, res, next) => {
-    const { search, ...queryString } = req.query;
-
     const features = new APIFeatures(
       Course.find(),
       (req.query as QueryString) || {},
