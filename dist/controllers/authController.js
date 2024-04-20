@@ -18,20 +18,21 @@ const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const email_1 = __importDefault(require("../utils/email"));
 const crypto_1 = __importDefault(require("crypto"));
-const env_files_1 = __importDefault(require("../env_files"));
 const querystring_1 = __importDefault(require("querystring"));
 const axios_1 = __importDefault(require("axios"));
 class AuthController {
     constructor() {
         this.signToken = (user, isRefresh = false) => {
-            return jsonwebtoken_1.default.sign(isRefresh ? { id: user.id } : user, env_files_1.default.JWT_SECRET || '', {
-                expiresIn: isRefresh ? env_files_1.default.JWT_COOKIE_EXPIRES_IN : env_files_1.default.JWT_SECRET_IN,
+            return jsonwebtoken_1.default.sign(isRefresh ? { id: user.id } : user, process.env.JWT_SECRET || '', {
+                expiresIn: isRefresh
+                    ? process.env.JWT_COOKIE_EXPIRES_IN
+                    : process.env.JWT_SECRET_IN,
             });
         };
         this.createAndSendToken = (user, statusCode, res, sendRes) => {
             const token = this.signToken({ id: user.id, email: user.email });
             const refreshToken = this.signToken({ id: user.id }, true);
-            const cookieExpireTime = env_files_1.default.JWT_COOKIE_EXPIRES_IN;
+            const cookieExpireTime = process.env.JWT_COOKIE_EXPIRES_IN;
             // check if cookie expire time is available
             if (!cookieExpireTime)
                 return new appError_1.default('Cookie expire time not found', 400);
@@ -45,7 +46,7 @@ class AuthController {
                 path: '/',
             };
             // sends a secure jwt token to the browser that would be sent back to us upon every request
-            if (env_files_1.default.NODE_ENV === 'production')
+            if (process.env.NODE_ENV === 'production')
                 cookieOptions.secure = true;
             res.cookie('jwt', token, cookieOptions);
             res.cookie('refreshToken', refreshToken, cookieOptions);
@@ -71,8 +72,8 @@ class AuthController {
         }));
         //   signup or signin with google
         this.googleSignUpInitiate = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const clientId = env_files_1.default.GOOGLE_CLIENT_ID;
-            const redirectUri = env_files_1.default.GOOGLE_REDIRECT_URI;
+            const clientId = process.env.GOOGLE_CLIENT_ID;
+            const redirectUri = process.env.GOOGLE_REDIRECT_URI;
             const scopes = ['email', 'profile']; // Define desired scopes
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
                 `client_id=${clientId}&redirect_uri=${redirectUri}` +
@@ -85,9 +86,9 @@ class AuthController {
             const tokenUrl = 'https://oauth2.googleapis.com/token';
             const params = {
                 code,
-                client_id: env_files_1.default.GOOGLE_CLIENT_ID,
-                client_secret: env_files_1.default.GOOGLE_CLIENT_SECRET,
-                redirect_uri: env_files_1.default.GOOGLE_REDIRECT_URI,
+                client_id: process.env.GOOGLE_CLIENT_ID,
+                client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                redirect_uri: process.env.GOOGLE_REDIRECT_URI,
                 grant_type: 'authorization_code',
             };
             const response = yield axios_1.default.post(tokenUrl, querystring_1.default.stringify(params), {
@@ -108,7 +109,7 @@ class AuthController {
                 isEmailConfirmed: true,
             }, { upsert: true, new: true });
             this.createAndSendToken(user, 201, res, false);
-            res.redirect(`${env_files_1.default.FRONTEND_URL}`);
+            res.redirect(`${process.env.FRONTEND_URL}`);
         }));
         this.confirmEmailAndActivateAccount = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { confirmEmailToken } = req.params;
@@ -215,7 +216,7 @@ class AuthController {
             if (!token) {
                 return next(new appError_1.default('auth token not available in header', 404));
             }
-            const decoded = jsonwebtoken_1.default.verify(token, env_files_1.default.JWT_SECRET || '');
+            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || '');
             const user = yield userModel_1.default.findOne({
                 _id: decoded.id,
                 email: decoded.email,
@@ -233,7 +234,7 @@ class AuthController {
         // send refresh token
         this.refreshToken = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { refreshToken } = req.body;
-            const decoded = jsonwebtoken_1.default.verify(refreshToken, env_files_1.default.JWT_SECRET || '');
+            const decoded = jsonwebtoken_1.default.verify(refreshToken, process.env.JWT_SECRET || '');
             const user = yield userModel_1.default.findOne({
                 _id: decoded.id,
             });
@@ -253,7 +254,7 @@ class AuthController {
             next();
         }));
         this.googleRedirect = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            res.redirect(env_files_1.default.FRONTEND_URL);
+            res.redirect(process.env.FRONTEND_URL);
         }));
     }
 }

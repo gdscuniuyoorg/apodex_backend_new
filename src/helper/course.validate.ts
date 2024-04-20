@@ -1,15 +1,13 @@
-import { z } from 'zod';
+import Joi from 'joi';
 
-const commonSchema = z.object({
-  name: z.string().min(1),
-  category: z.string().min(1),
-  objectives: z.string().min(1),
-  description: z.string().min(1),
-  instructor: z.string().min(1),
-  videos: z.array(z.string().min(1)),
-  materials: z.array(z.string()).optional(),
+const courseValidate = Joi.object({
+  name: Joi.string().min(1).required(),
+  category: Joi.string().min(1).required(),
+  objectives: Joi.string().min(1).required(),
+  description: Joi.string().min(1).required(),
+  instructor: Joi.string().min(1).required(),
+  videos: Joi.array().items(Joi.string().min(1)).required(),
+  materials: Joi.array().items(Joi.string()).optional(),
 });
 
-export const validateCreateCourse = commonSchema.extend({});
-
-export const validateUpdateCourse = commonSchema.partial();
+export default courseValidate;

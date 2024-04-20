@@ -1,15 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateUpdateCourse = exports.validateCreateCourse = void 0;
-const zod_1 = require("zod");
-const commonSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1),
-    category: zod_1.z.string().min(1),
-    objectives: zod_1.z.string().min(1),
-    description: zod_1.z.string().min(1),
-    instructor: zod_1.z.string().min(1),
-    videos: zod_1.z.array(zod_1.z.string().min(1)),
-    materials: zod_1.z.array(zod_1.z.string()).optional(),
+const joi_1 = __importDefault(require("joi"));
+const courseValidate = joi_1.default.object({
+    name: joi_1.default.string().min(1).required(),
+    category: joi_1.default.string().min(1).required(),
+    objectives: joi_1.default.string().min(1).required(),
+    description: joi_1.default.string().min(1).required(),
+    instructor: joi_1.default.string().min(1).required(),
+    videos: joi_1.default.array().items(joi_1.default.string().min(1)).required(),
+    materials: joi_1.default.array().items(joi_1.default.string()).optional(),
 });
-exports.validateCreateCourse = commonSchema.extend({});
-exports.validateUpdateCourse = commonSchema.partial();
+exports.default = courseValidate;

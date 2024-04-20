@@ -6,8 +6,6 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import Email from '../utils/email';
 import crypto from 'crypto';
 import { TokenUser } from '../types';
-import confirmEmailTemplate from '../utils/confirmEmailTemplate';
-import ENV from '../env_files';
 import querystring from 'querystring';
 import axios from 'axios';
 import { CookieOptions } from 'express';
@@ -18,9 +16,15 @@ export interface CustomRequest extends Request {
 
 class AuthController {
   signToken = (user: TokenUser, isRefresh = false) => {
-    return jwt.sign(isRefresh ? { id: user.id } : user, ENV.JWT_SECRET || '', {
-      expiresIn: isRefresh ? ENV.JWT_COOKIE_EXPIRES_IN : ENV.JWT_SECRET_IN,
-    });
+    return jwt.sign(
+      isRefresh ? { id: user.id } : user,
+      process.env.JWT_SECRET || '',
+      {
+        expiresIn: isRefresh
+          ? process.env.JWT_COOKIE_EXPIRES_IN
+          : process.env.JWT_SECRET_IN,
+      },
+    );
   };
 
   createAndSendToken = (
@@ -31,7 +35,7 @@ class AuthController {
   ) => {
     const token = this.signToken({ id: user.id, email: user.email });
     const refreshToken = this.signToken({ id: user.id }, true);
-    const cookieExpireTime = ENV.JWT_COOKIE_EXPIRES_IN;
+    const cookieExpireTime = process.env.JWT_COOKIE_EXPIRES_IN;
 
     // check if cookie expire time is available
     if (!cookieExpireTime)
@@ -48,7 +52,7 @@ class AuthController {
     };
 
     // sends a secure jwt token to the browser that would be sent back to us upon every request
-    if (ENV.NODE_ENV === 'production') cookieOptions.secure = true;
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
     res.cookie('jwt', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
@@ -80,8 +84,8 @@ class AuthController {
   //   signup or signin with google
   googleSignUpInitiate: RequestHandler = catchAsync(
     async (req, res, next): Promise<void> => {
-      const clientId = ENV.GOOGLE_CLIENT_ID;
-      const redirectUri = ENV.GOOGLE_REDIRECT_URI;
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      const redirectUri = process.env.GOOGLE_REDIRECT_URI;
       const scopes = ['email', 'profile']; // Define desired scopes
 
       const authUrl =
@@ -100,9 +104,9 @@ class AuthController {
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     const params: any = {
       code,
-      client_id: ENV.GOOGLE_CLIENT_ID,
-      client_secret: ENV.GOOGLE_CLIENT_SECRET,
-      redirect_uri: ENV.GOOGLE_REDIRECT_URI,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
       grant_type: 'authorization_code',
     };
 
@@ -134,7 +138,7 @@ class AuthController {
     );
 
     this.createAndSendToken(user, 201, res, false);
-    res.redirect(`${ENV.FRONTEND_URL}`);
+    res.redirect(`${process.env.FRONTEND_URL}`);
   });
 
   confirmEmailAndActivateAccount: RequestHandler = catchAsync(
@@ -286,7 +290,10 @@ class AuthController {
         return next(new AppError('auth token not available in header', 404));
       }
 
-      const decoded = jwt.verify(token, ENV.JWT_SECRET || '') as JwtPayload;
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || '',
+      ) as JwtPayload;
 
       const user = await User.findOne({
         _id: decoded.id,
@@ -318,7 +325,7 @@ class AuthController {
 
     const decoded = jwt.verify(
       refreshToken,
-      ENV.JWT_SECRET || '',
+      process.env.JWT_SECRET || '',
     ) as JwtPayload;
 
     const user = await User.findOne({
@@ -345,7 +352,7 @@ class AuthController {
     });
 
   googleRedirect: RequestHandler = catchAsync(async (req, res, next) => {
-    res.redirect(ENV.FRONTEND_URL);
+    res.redirect(process.env.FRONTEND_URL);
   });
 }
 
