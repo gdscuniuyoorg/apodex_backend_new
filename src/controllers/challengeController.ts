@@ -15,6 +15,7 @@ class ChallengeController {
   joinChallange: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const userId = req.user?.id;
+
       const challenge: IChallenge | null = await Challenge.findById(
         req.body.challengeId,
       );
@@ -23,11 +24,8 @@ class ChallengeController {
         return next(new AppError('Challenge does not exist', 404));
       }
 
-      // join as participants
       if (challenge.participationType !== 'Team') {
-        const alreadyInChallenge = challenge.participants.includes(userId);
-
-        if (alreadyInChallenge) {
+        if (challenge.participants.includes(userId)) {
           return next(new AppError('You are already in this challenge', 400));
         }
 
@@ -37,12 +35,13 @@ class ChallengeController {
         res.status(201).json({ message: 'Success joining challenge' });
       }
 
-      // join as team
+      // Join as team
       const { error, value } = teamValidate.validate(req.body);
       if (error) {
         return next(new AppError(error.message, 400));
       }
 
+      // Check if the user is already part of another team for the same challenge
       const alreadyInChallenge = await ChallangeTeam.findOne({
         challengeId: value.challengeId,
         talents: userId,
@@ -57,6 +56,7 @@ class ChallengeController {
         );
       }
 
+      // Check if any talent in the team is already a member of another team for this challenge
       const talentsInChallenge = await ChallangeTeam.find({
         challengeId: value.challengeId,
         talents: { $in: value.talents },
@@ -71,26 +71,30 @@ class ChallengeController {
         );
       }
 
+      // Check if the number of talents in the team falls within the min and max team participants range specified in the challenge
+      if (
+        challenge.maxTeamParticipants &&
+        challenge.minTeamParticipants &&
+        (value.talents.length > challenge.maxTeamParticipants ||
+          value.talents.length < challenge.minTeamParticipants)
+      ) {
+        return next(
+          new AppError(
+            'The number of participants does not meet the requirements',
+            400,
+          ),
+        );
+      }
+
       value.talents.push(userId);
       value.talents = [...new Set(value.talents)];
 
-      if (challenge.maxTeamParticipants && challenge.minTeamParticipants) {
-        if (
-          value.talents.length > challenge?.maxTeamParticipants ||
-          value.talents.length < challenge.minTeamParticipants
-        ) {
-          return next(
-            new AppError(
-              'The participants are either greater then or less than ',
-              400,
-            ),
-          );
-        }
-      }
-
       const team = await ChallangeTeam.create(value);
-      challenge.participants.push(team.id);
 
+      challenge.participants.push(team.id);
+      await challenge.save();
+
+      // Respond with success message and team data
       res.status(201).json({
         status: 'success',
         data: {
@@ -99,6 +103,55 @@ class ChallengeController {
       });
     },
   );
+
+  exitChallenge: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const userId = req.user?.id;
+      const { challangeId: challengeId } = req.params;
+
+      const challenge: IChallenge | null =
+        await Challenge.findById(challengeId);
+
+      if (!challenge) {
+        return next(new AppError('Challenge does not exist', 404));
+      }
+
+      // Individuals
+      if (challenge.participationType !== 'Team') {
+        if (!challenge.participants.includes(userId)) {
+          return next(new AppError("You're not in this challenge", 404));
+        }
+
+        const index = challenge.participants.findIndex(
+          (el) => el.toString() === userId,
+        );
+
+        challenge.participants.splice(index, 1);
+        await challenge.save();
+
+        res.status(201).json({ message: 'success exiting challange' });
+      }
+
+      // Teams
+      const team = await ChallangeTeam.findOne({
+        challengeId,
+        talents: {
+          $elemMatch: { $in: [userId] },
+        },
+      });
+
+      if (!team) {
+        return next(new AppError('You are not part of the challenge', 404));
+      }
+
+      const index = team.talents.findIndex((el) => el.toString() === userId);
+      team.talents.splice(index, 1);
+      await team.save();
+
+      res.status(201).json({ message: 'Success exiting challange' });
+    },
+  );
+
   addChallenge: RequestHandler = catchAsync(async (req, res, next) => {
     const { error, value } = challengeValidate.validate(req.body);
 
@@ -136,7 +189,7 @@ class ChallengeController {
     }
 
     const updatedChallenge = await Challenge.findByIdAndUpdate(
-      req.params.id,
+      req.params.challengeId,
       value,
       { new: true, runValidators: true },
     );
@@ -150,7 +203,7 @@ class ChallengeController {
 
   // Delete a challenge
   deleteChallenge: RequestHandler = catchAsync(async (req, res, next) => {
-    await Challenge.findByIdAndDelete(req.params.id);
+    await Challenge.findByIdAndDelete(req.params.challengeId);
 
     res.status(204).json({
       status: 'success',
@@ -160,7 +213,7 @@ class ChallengeController {
 
   // Get a single challenge by ID
   getChallenge: RequestHandler = catchAsync(async (req, res, next) => {
-    const challenge = await Challenge.findById(req.params.id).populate(
+    const challenge = await Challenge.findById(req.params.challengeId).populate(
       'participants',
     );
 

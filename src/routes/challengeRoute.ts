@@ -5,7 +5,17 @@ const router = Router();
 import challengeController from '../controllers/challengeController';
 import authController from '../controllers/authController';
 
-router.post('/join', authController.protect, challengeController.joinChallange);
+router.patch(
+  '/join',
+  authController.protect,
+  challengeController.joinChallange,
+);
+
+router.patch(
+  '/exit/:challengeId',
+  authController.protect,
+  challengeController.exitChallenge,
+);
 
 router
   .route('/')
@@ -17,7 +27,7 @@ router
   .get(challengeController.getAllChallenges);
 
 router
-  .route('/:id')
+  .route('/:challengeId')
   .get(challengeController.getChallenge)
   .patch(
     authController.protect,
