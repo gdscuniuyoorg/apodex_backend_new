@@ -1,5 +1,8 @@
 import { RequestHandler } from 'express';
-import Challenge, { IChallenge } from '../models/challengeModel';
+import Challenge, {
+  IChallenge,
+  ParticipationType,
+} from '../models/challengeModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import {
@@ -24,7 +27,7 @@ class ChallengeController {
         return next(new AppError('Challenge does not exist', 404));
       }
 
-      if (challenge.participationType !== 'Team') {
+      if (challenge.participationType !== ParticipationType.Team) {
         if (challenge.participants.includes(userId)) {
           return next(new AppError('You are already in this challenge', 400));
         }
@@ -33,6 +36,7 @@ class ChallengeController {
         await challenge.save();
 
         res.status(201).json({ message: 'Success joining challenge' });
+        return;
       }
 
       // Join as team
@@ -80,7 +84,7 @@ class ChallengeController {
       ) {
         return next(
           new AppError(
-            'The number of participants does not meet the requirements',
+            `The number of participants does not meet the requirements, you need atleast ${challenge.minTeamParticipants} and at most ${challenge.maxTeamParticipants}`,
             400,
           ),
         );
@@ -88,6 +92,9 @@ class ChallengeController {
 
       value.talents.push(userId);
       value.talents = [...new Set(value.talents)];
+      value.teamLead = userId;
+      value.maxTalents = challenge.maxTeamParticipants;
+      value.minTalents = challenge.minTeamParticipants;
 
       const team = await ChallangeTeam.create(value);
 
@@ -107,7 +114,7 @@ class ChallengeController {
   exitChallenge: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const userId = req.user?.id;
-      const { challangeId: challengeId } = req.params;
+      const { challengeId } = req.params;
 
       const challenge: IChallenge | null =
         await Challenge.findById(challengeId);
@@ -117,7 +124,7 @@ class ChallengeController {
       }
 
       // Individuals
-      if (challenge.participationType !== 'Team') {
+      if (challenge.participationType !== ParticipationType.Team) {
         if (!challenge.participants.includes(userId)) {
           return next(new AppError("You're not in this challenge", 404));
         }
@@ -130,9 +137,10 @@ class ChallengeController {
         await challenge.save();
 
         res.status(201).json({ message: 'success exiting challange' });
+        return;
       }
 
-      // Teams
+      // exit teams
       const team = await ChallangeTeam.findOne({
         challengeId,
         talents: {
@@ -146,6 +154,11 @@ class ChallengeController {
 
       const index = team.talents.findIndex((el) => el.toString() === userId);
       team.talents.splice(index, 1);
+      // remove the teamlead if nah him
+      if (team.teamLead && team.teamLead.toString() === userId) {
+        team.teamLead = undefined;
+      }
+
       await team.save();
 
       res.status(201).json({ message: 'Success exiting challange' });

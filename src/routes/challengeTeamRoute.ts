@@ -4,10 +4,14 @@ import authController from '../controllers/authController';
 
 const router = Router();
 
-router.route('/').get(challengeTeamController.getAllTeams);
+router.route('/all/:challengeId').get(challengeTeamController.getAllTeams);
+
+router.route('/add/:teamId').patch(challengeTeamController.addTalentToTeam);
+
+router.route('/remove/:teamId').patch(challengeTeamController.addTalentToTeam);
 
 router
-  .route('/:id')
+  .route('/:teamId')
   .get(challengeTeamController.getTeam)
   .patch(authController.protect, challengeTeamController.updateTeam)
   .delete(authController.protect, challengeTeamController.deleteTeam);

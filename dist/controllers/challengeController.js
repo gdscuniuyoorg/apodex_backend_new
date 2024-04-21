@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const challengeModel_1 = __importDefault(require("../models/challengeModel"));
+const challengeModel_1 = __importStar(require("../models/challengeModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const challenge_validate_1 = require("../helper/challenge.validate");
@@ -28,13 +51,14 @@ class ChallengeController {
             if (!challenge) {
                 return next(new appError_1.default('Challenge does not exist', 404));
             }
-            if (challenge.participationType !== 'Team') {
+            if (challenge.participationType !== challengeModel_1.ParticipationType.Team) {
                 if (challenge.participants.includes(userId)) {
                     return next(new appError_1.default('You are already in this challenge', 400));
                 }
                 challenge.participants.push(userId);
                 yield challenge.save();
                 res.status(201).json({ message: 'Success joining challenge' });
+                return;
             }
             // Join as team
             const { error, value } = team_validate_1.teamValidate.validate(req.body);
@@ -62,10 +86,13 @@ class ChallengeController {
                 challenge.minTeamParticipants &&
                 (value.talents.length > challenge.maxTeamParticipants ||
                     value.talents.length < challenge.minTeamParticipants)) {
-                return next(new appError_1.default('The number of participants does not meet the requirements', 400));
+                return next(new appError_1.default(`The number of participants does not meet the requirements, you need atleast ${challenge.minTeamParticipants} and at most ${challenge.maxTeamParticipants}`, 400));
             }
             value.talents.push(userId);
             value.talents = [...new Set(value.talents)];
+            value.teamLead = userId;
+            value.maxTalents = challenge.maxTeamParticipants;
+            value.minTalents = challenge.minTeamParticipants;
             const team = yield challengeTeamModel_1.default.create(value);
             challenge.participants.push(team.id);
             yield challenge.save();
@@ -80,13 +107,13 @@ class ChallengeController {
         this.exitChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _b;
             const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
-            const { challangeId: challengeId } = req.params;
+            const { challengeId } = req.params;
             const challenge = yield challengeModel_1.default.findById(challengeId);
             if (!challenge) {
                 return next(new appError_1.default('Challenge does not exist', 404));
             }
             // Individuals
-            if (challenge.participationType !== 'Team') {
+            if (challenge.participationType !== challengeModel_1.ParticipationType.Team) {
                 if (!challenge.participants.includes(userId)) {
                     return next(new appError_1.default("You're not in this challenge", 404));
                 }
@@ -94,8 +121,9 @@ class ChallengeController {
                 challenge.participants.splice(index, 1);
                 yield challenge.save();
                 res.status(201).json({ message: 'success exiting challange' });
+                return;
             }
-            // Teams
+            // exit teams
             const team = yield challengeTeamModel_1.default.findOne({
                 challengeId,
                 talents: {
@@ -107,6 +135,10 @@ class ChallengeController {
             }
             const index = team.talents.findIndex((el) => el.toString() === userId);
             team.talents.splice(index, 1);
+            // remove the teamlead if nah him
+            if (team.teamLead && team.teamLead.toString() === userId) {
+                team.teamLead = undefined;
+            }
             yield team.save();
             res.status(201).json({ message: 'Success exiting challange' });
         }));

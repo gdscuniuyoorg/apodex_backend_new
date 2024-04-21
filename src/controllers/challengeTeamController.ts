@@ -1,62 +1,35 @@
-import { RequestHandler } from 'express';
-import ChallangeTeam from '../models/challengeTeamModel';
+import { NextFunction, RequestHandler } from 'express';
+import ChallangeTeam, { IChallangeTeam } from '../models/challengeTeamModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import Challenge, { IChallenge } from '../models/challengeModel';
 import { teamValidate } from '../helper/team.validate';
 import { CustomRequest } from './authController';
+import { UserRole } from '../models/userModel';
 
 class TeamController {
-  // Add a new team
-  joinChallange: RequestHandler = catchAsync(
-    async (req: CustomRequest, res, next) => {
-      const email = req.user?.email;
-      const { error, value } = teamValidate.validate(req.body);
+  checkRole = async (
+    req: CustomRequest,
+    next: NextFunction,
+  ): Promise<IChallangeTeam | void> => {
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    const { teamId } = req.params;
 
-      if (error) {
-        return next(new AppError(error.message, 400));
-      }
+    const team = await ChallangeTeam.findById(teamId);
 
-      const challenge: IChallenge | null = await Challenge.findById(
-        value.challengeId,
+    if (!team) {
+      return next(new AppError('This team does not exist', 404));
+    }
+
+    if (role !== UserRole.ADMIN || team.teamLead?.toString() !== userId) {
+      return next(
+        new AppError('You dont have permission to delete this team', 400),
       );
+    }
 
-      if (!challenge) {
-        return next(new AppError('Challenge does not exist', 404));
-      }
-
-      if (challenge.participationType !== 'Team') {
-        return next(new AppError('This challenge does not allow teams', 400));
-      }
-
-      // adding yourself to team
-      value.talents.push(email);
-      value.talents = [...new Set(value.talents)];
-
-      if (challenge.maxTeamParticipants && challenge.minTeamParticipants) {
-        if (
-          value.talents.length > challenge?.maxTeamParticipants ||
-          value.talents.length < challenge.minTeamParticipants
-        ) {
-          return next(
-            new AppError(
-              'The participants are either greater then or less than ',
-              400,
-            ),
-          );
-        }
-      }
-
-      const team = await ChallangeTeam.create(value);
-      res.status(201).json({
-        status: 'success',
-        data: {
-          team,
-        },
-      });
-    },
-  );
-
+    return team;
+  };
   // Update an existing team
   updateTeam: RequestHandler = catchAsync(async (req, res, next) => {
     const updatedTeam = await ChallangeTeam.findByIdAndUpdate(
@@ -72,18 +45,79 @@ class TeamController {
     });
   });
 
+  removeTalentFromTeam: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const { talentId } = req.body;
+
+      const team = await this.checkRole(req, next);
+
+      if (!team) {
+        return next(new AppError('Team not found', 404));
+      }
+
+      const index = team.talents.findIndex((el) => el.toString() === talentId);
+
+      if (!index || index < 0) {
+        return next(
+          new AppError('This talent is not a memeber of this team', 404),
+        );
+      }
+
+      team.talents.splice(index, 1);
+      if (team.talents.length < team.minTalents) {
+        return next(new AppError('Number of talents too little', 400));
+      }
+
+      await team.save();
+
+      res.status(201).send('success removing talent from team');
+    },
+  );
+
+  addTalentToTeam: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const { talentId } = req.body;
+
+      const team = await this.checkRole(req, next);
+
+      if (!team) {
+        return next(new AppError('Team not found', 404));
+      }
+
+      team.talents.push(talentId);
+      if (team.talents.length > team.maxTalents) {
+        return next(new AppError('Number of talents too large', 400));
+      }
+
+      await team.save();
+
+      res.status(201).send('success add talent to team');
+    },
+  );
+
   // Delete a team
-  deleteTeam: RequestHandler = catchAsync(async (req, res, next) => {
-    await ChallangeTeam.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  });
+  deleteTeam: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const team = await this.checkRole(req, next);
+
+      if (!team) {
+        return next(new AppError('Team does not exist', 404));
+      }
+
+      await team.deleteOne();
+      res.status(204).json({
+        status: 'success',
+        data: null,
+      });
+    },
+  );
 
   // Get a single team by ID
   getTeam: RequestHandler = catchAsync(async (req, res, next) => {
-    const team = await ChallangeTeam.findById(req.params.id);
+    const team = await ChallangeTeam.findById(req.params.teamId).populate(
+      'talents',
+    );
+
     if (!team) {
       return next(new AppError('Team not found', 404));
     }
@@ -97,7 +131,9 @@ class TeamController {
 
   // Get all teams
   getAllTeams: RequestHandler = catchAsync(async (req, res, next) => {
-    const teams = await ChallangeTeam.find();
+    const { challengeId } = req.params;
+    const teams = await ChallangeTeam.find({ challengeId });
+
     res.status(200).json({
       status: 'success',
       results: teams.length,

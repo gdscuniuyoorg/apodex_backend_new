@@ -8,7 +8,7 @@ const joi_1 = __importDefault(require("joi"));
 exports.teamValidate = joi_1.default.object({
     name: joi_1.default.string().min(1).required(),
     talents: joi_1.default.array().items(joi_1.default.string().min(1)).required(),
-    challengeId: joi_1.default.string().min(1),
+    challengeId: joi_1.default.string().min(1).required(),
 });
 exports.updateTeamValidate = joi_1.default.object({
     name: joi_1.default.string().min(1),
