@@ -2,10 +2,9 @@ import { NextFunction, RequestHandler } from 'express';
 import ChallangeTeam, { IChallangeTeam } from '../models/challengeTeamModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import Challenge, { IChallenge } from '../models/challengeModel';
-import { teamValidate } from '../helper/team.validate';
 import { CustomRequest } from './authController';
 import { UserRole } from '../models/userModel';
+import { updateTeamValidate } from '../helper/team.validate';
 
 class TeamController {
   checkRole = async (
@@ -22,7 +21,12 @@ class TeamController {
       return next(new AppError('This team does not exist', 404));
     }
 
-    if (role !== UserRole.ADMIN || team.teamLead?.toString() !== userId) {
+    console.log(role === UserRole.ADMIN, team.teamLead?.toString(), userId);
+    if (
+      role !== UserRole.ADMIN ||
+      !team.teamLead ||
+      team.teamLead?.toString() !== userId
+    ) {
       return next(
         new AppError('You dont have permission to delete this team', 400),
       );
@@ -31,16 +35,28 @@ class TeamController {
     return team;
   };
   // Update an existing team
-  updateTeam: RequestHandler = catchAsync(async (req, res, next) => {
-    const updatedTeam = await ChallangeTeam.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+  updateTeamName: RequestHandler = catchAsync(async (req, res, next) => {
+    const { error, value } = updateTeamValidate.validate(req.body);
+    const { teamId } = req.params;
+
+    if (error) {
+      return next(new AppError(error.message, 400));
+    }
+
+    const team = await ChallangeTeam.findByIdAndUpdate(
+      teamId,
+      { name: value.name },
       { new: true, runValidators: true },
     );
+
+    if (!team) {
+      return next(new AppError('Team not found', 404));
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
-        team: updatedTeam,
+        team,
       },
     });
   });
@@ -79,7 +95,6 @@ class TeamController {
       const { talentId } = req.body;
 
       const team = await this.checkRole(req, next);
-
       if (!team) {
         return next(new AppError('Team not found', 404));
       }

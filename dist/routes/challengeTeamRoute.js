@@ -8,11 +8,15 @@ const challengeTeamController_1 = __importDefault(require("../controllers/challe
 const authController_1 = __importDefault(require("../controllers/authController"));
 const router = (0, express_1.Router)();
 router.route('/all/:challengeId').get(challengeTeamController_1.default.getAllTeams);
-router.route('/add/:teamId').patch(challengeTeamController_1.default.addTalentToTeam);
-router.route('/remove/:teamId').patch(challengeTeamController_1.default.addTalentToTeam);
+router
+    .route('/add/:teamId')
+    .patch(authController_1.default.protect, challengeTeamController_1.default.addTalentToTeam);
+router
+    .route('/remove/:teamId')
+    .patch(authController_1.default.protect, challengeTeamController_1.default.addTalentToTeam);
 router
     .route('/:teamId')
     .get(challengeTeamController_1.default.getTeam)
-    .patch(authController_1.default.protect, challengeTeamController_1.default.updateTeam)
+    .patch(authController_1.default.protect, challengeTeamController_1.default.updateTeamName)
     .delete(authController_1.default.protect, challengeTeamController_1.default.deleteTeam);
 exports.default = router;

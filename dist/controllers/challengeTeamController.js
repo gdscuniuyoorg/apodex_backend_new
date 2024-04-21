@@ -16,10 +16,11 @@ const challengeTeamModel_1 = __importDefault(require("../models/challengeTeamMod
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const userModel_1 = require("../models/userModel");
+const team_validate_1 = require("../helper/team.validate");
 class TeamController {
     constructor() {
         this.checkRole = (req, next) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
             const role = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
             const { teamId } = req.params;
@@ -27,18 +28,29 @@ class TeamController {
             if (!team) {
                 return next(new appError_1.default('This team does not exist', 404));
             }
-            if (role !== userModel_1.UserRole.ADMIN || ((_c = team.teamLead) === null || _c === void 0 ? void 0 : _c.toString()) !== userId) {
+            console.log(role === userModel_1.UserRole.ADMIN, (_c = team.teamLead) === null || _c === void 0 ? void 0 : _c.toString(), userId);
+            if (role !== userModel_1.UserRole.ADMIN ||
+                !team.teamLead ||
+                ((_d = team.teamLead) === null || _d === void 0 ? void 0 : _d.toString()) !== userId) {
                 return next(new appError_1.default('You dont have permission to delete this team', 400));
             }
             return team;
         });
         // Update an existing team
-        this.updateTeam = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const updatedTeam = yield challengeTeamModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        this.updateTeamName = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const { error, value } = team_validate_1.updateTeamValidate.validate(req.body);
+            const { teamId } = req.params;
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
+            const team = yield challengeTeamModel_1.default.findByIdAndUpdate(teamId, { name: value.name }, { new: true, runValidators: true });
+            if (!team) {
+                return next(new appError_1.default('Team not found', 404));
+            }
             res.status(200).json({
                 status: 'success',
                 data: {
-                    team: updatedTeam,
+                    team,
                 },
             });
         }));
