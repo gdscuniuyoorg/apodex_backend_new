@@ -3,7 +3,7 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-enum UserRole {
+export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
 }

@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -58,11 +47,11 @@ class CourseController {
             });
         }));
         this.addCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error } = course_validate_1.courseValidate.validate(req.body);
+            const { error, value } = course_validate_1.courseValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            const newCourse = yield courseModel_1.default.create(req.body);
+            const newCourse = yield courseModel_1.default.create(value);
             res.status(201).json({
                 status: 'success',
                 data: {
@@ -72,11 +61,14 @@ class CourseController {
         }));
         // Update an existing course
         this.updateCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error } = course_validate_1.updateCourseValidate.validate(req.body);
+            const { error, value } = course_validate_1.updateCourseValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            const updatedCourse = yield courseModel_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+            const updatedCourse = yield courseModel_1.default.findByIdAndUpdate(req.params.id, value, {
+                new: true,
+                runValidators: true,
+            });
             res.status(200).json({
                 status: 'success',
                 data: {
@@ -98,7 +90,7 @@ class CourseController {
         // Get a single course by ID
         this.getCourse = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
-            const course = yield courseModel_1.default.findOne({ _id: id });
+            const course = yield courseModel_1.default.findOne({ _id: id }).populate('instructor');
             if (!course) {
                 return next(new appError_1.default('Course not found', 404));
             }
@@ -111,7 +103,6 @@ class CourseController {
         }));
         // Get all courses
         this.getAllCourses = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const _a = req.query, { search } = _a, queryString = __rest(_a, ["search"]);
             const features = new apiFeatures_1.default(courseModel_1.default.find(), req.query || {})
                 .filter()
                 .sort()

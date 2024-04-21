@@ -51,9 +51,10 @@ class UserController {
             }
             // filter body properly
             const filterBody = (0, filterObj_1.default)(req.body, filterObj_1.keysToExtract);
-            if (req.file)
+            if (req.file) {
                 filterBody.image = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
-            const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody });
+            }
+            const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody }, { new: true });
             if (!profile) {
                 return next(new appError_1.default('Profile not found', 404));
             }
@@ -68,29 +69,11 @@ class UserController {
             (0, sendResponse_1.default)(res, 200, profile);
         }));
         this.getUsers = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            // paginate these response
-            console.log(req.cookies);
             const users = yield userModel_1.default.find().select('-password -__v -confirmEmailToken -isEmailConfirmed -role');
             if (!users) {
                 return next(new appError_1.default('User profiles does not exist', 404));
             }
             (0, sendResponse_1.default)(res, 200, users);
-        }));
-        this.resizePhoto = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            var _b;
-            if (!req.file)
-                return next();
-            // always set the filename
-            req.file.filename = `user-${(_b = req.user) === null || _b === void 0 ? void 0 : _b.id}-${Date.now()}.jpeg`;
-            // sharp(req.file.buffer)
-            //   // sets the size to height and width
-            //   .resize(500, 500)
-            //   // sets the format based on the size
-            //   .toFormat('jpeg')
-            //   // sets the quality
-            //   .jpeg({ quality: 90 })
-            //   .toFile(`./public/img/users/${req.file.filename}`);
-            next();
         }));
     }
 }
