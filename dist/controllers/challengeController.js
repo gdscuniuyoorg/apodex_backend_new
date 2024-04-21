@@ -17,10 +17,65 @@ const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const challenge_validate_1 = require("../helper/challenge.validate");
 const apiFeatures_1 = __importDefault(require("../utils/apiFeatures"));
+const team_validate_1 = require("../helper/team.validate");
+const challengeTeamModel_1 = __importDefault(require("../models/challengeTeamModel"));
 class ChallengeController {
     constructor() {
+        this.joinChallange = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            const challenge = yield challengeModel_1.default.findById(req.body.challengeId);
+            if (!challenge) {
+                return next(new appError_1.default('Challenge does not exist', 404));
+            }
+            // join as participants
+            if (challenge.participationType !== 'Team') {
+                const alreadyInChallenge = challenge.participants.includes(userId);
+                if (alreadyInChallenge) {
+                    return next(new appError_1.default('You are already in this challenge', 400));
+                }
+                challenge.participants.push(userId);
+                yield challenge.save();
+                res.status(201).json({ message: 'Success joining challenge' });
+            }
+            // join as team
+            const { error, value } = team_validate_1.teamValidate.validate(req.body);
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
+            const alreadyInChallenge = yield challengeTeamModel_1.default.findOne({
+                challengeId: value.challengeId,
+                talents: userId,
+            });
+            if (alreadyInChallenge) {
+                return next(new appError_1.default("You're already registered for this challenge with a different team.", 400));
+            }
+            const talentsInChallenge = yield challengeTeamModel_1.default.find({
+                challengeId: value.challengeId,
+                talents: { $in: value.talents },
+            });
+            if (talentsInChallenge.length > 0) {
+                return next(new appError_1.default('One or more talents are already members of another team for this challenge', 400));
+            }
+            value.talents.push(userId);
+            value.talents = [...new Set(value.talents)];
+            if (challenge.maxTeamParticipants && challenge.minTeamParticipants) {
+                if (value.talents.length > (challenge === null || challenge === void 0 ? void 0 : challenge.maxTeamParticipants) ||
+                    value.talents.length < challenge.minTeamParticipants) {
+                    return next(new appError_1.default('The participants are either greater then or less than ', 400));
+                }
+            }
+            const team = yield challengeTeamModel_1.default.create(value);
+            challenge.participants.push(team.id);
+            res.status(201).json({
+                status: 'success',
+                data: {
+                    team,
+                },
+            });
+        }));
         this.addChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error, value } = challenge_validate_1.challengeSchema.validate(req.body);
+            const { error, value } = challenge_validate_1.challengeValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
@@ -36,7 +91,7 @@ class ChallengeController {
             });
         }));
         this.updateChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const { error, value } = challenge_validate_1.updateChallengeSchema.validate(req.body);
+            const { error, value } = challenge_validate_1.updateChallengeValidate.validate(req.body);
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }

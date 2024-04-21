@@ -10,6 +10,11 @@ const challangeTeamSchema = new mongoose_1.default.Schema({
         type: [mongoose_1.default.Schema.ObjectId],
         ref: 'User',
     },
+    challengeId: {
+        type: mongoose_1.default.Schema.ObjectId,
+        ref: 'Challenge',
+    },
+    votes: Number,
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

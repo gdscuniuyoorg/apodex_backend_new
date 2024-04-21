@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IChallangeTeam extends Document {
   name: string;
   talents: (typeof mongoose.Schema.ObjectId)[];
+  challengeId: typeof mongoose.Schema.ObjectId;
   votes: number;
 }
 
@@ -13,6 +14,11 @@ const challangeTeamSchema = new mongoose.Schema<IChallangeTeam>(
       type: [mongoose.Schema.ObjectId],
       ref: 'User',
     },
+    challengeId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Challenge',
+    },
+    votes: Number,
   },
 
   {

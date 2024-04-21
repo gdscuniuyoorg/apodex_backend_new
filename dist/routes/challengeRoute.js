@@ -8,6 +8,7 @@ const multerController_1 = require("../controllers/multerController");
 const router = (0, express_1.Router)();
 const challengeController_1 = __importDefault(require("../controllers/challengeController"));
 const authController_1 = __importDefault(require("../controllers/authController"));
+router.post('/join', authController_1.default.protect, challengeController_1.default.joinChallange);
 router
     .route('/')
     .post(authController_1.default.protect, (0, multerController_1.singleUpload)('coverPhoto'), challengeController_1.default.addChallenge)

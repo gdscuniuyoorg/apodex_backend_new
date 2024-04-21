@@ -4,10 +4,7 @@ import authController from '../controllers/authController';
 
 const router = Router();
 
-router
-  .route('/')
-  .get(challengeTeamController.getAllTeams)
-  .post(authController.protect, challengeTeamController.addTeam);
+router.route('/').get(challengeTeamController.getAllTeams);
 
 router
   .route('/:id')

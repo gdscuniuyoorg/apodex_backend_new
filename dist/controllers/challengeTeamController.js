@@ -15,15 +15,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const challengeTeamModel_1 = __importDefault(require("../models/challengeTeamModel"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const appError_1 = __importDefault(require("../utils/appError"));
+const challengeModel_1 = __importDefault(require("../models/challengeModel"));
+const team_validate_1 = require("../helper/team.validate");
 class TeamController {
     constructor() {
         // Add a new team
-        this.addTeam = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const newTeam = yield challengeTeamModel_1.default.create(req.body);
+        this.joinChallange = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+            const { error, value } = team_validate_1.teamValidate.validate(req.body);
+            if (error) {
+                return next(new appError_1.default(error.message, 400));
+            }
+            const challenge = yield challengeModel_1.default.findById(value.challengeId);
+            if (!challenge) {
+                return next(new appError_1.default('Challenge does not exist', 404));
+            }
+            if (challenge.participationType !== 'Team') {
+                return next(new appError_1.default('This challenge does not allow teams', 400));
+            }
+            // adding yourself to team
+            value.talents.push(email);
+            value.talents = [...new Set(value.talents)];
+            if (challenge.maxTeamParticipants && challenge.minTeamParticipants) {
+                if (value.talents.length > (challenge === null || challenge === void 0 ? void 0 : challenge.maxTeamParticipants) ||
+                    value.talents.length < challenge.minTeamParticipants) {
+                    return next(new appError_1.default('The participants are either greater then or less than ', 400));
+                }
+            }
+            const team = yield challengeTeamModel_1.default.create(value);
             res.status(201).json({
                 status: 'success',
                 data: {
-                    team: newTeam,
+                    team,
                 },
             });
         }));

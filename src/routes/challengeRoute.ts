@@ -5,6 +5,8 @@ const router = Router();
 import challengeController from '../controllers/challengeController';
 import authController from '../controllers/authController';
 
+router.post('/join', authController.protect, challengeController.joinChallange);
+
 router
   .route('/')
   .post(

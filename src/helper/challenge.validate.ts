@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const challengeSchema = Joi.object({
+export const challengeValidate = Joi.object({
   name: Joi.string().min(1).required(),
   description: Joi.string().min(1).required(),
   participants: Joi.array().items(Joi.string().min(1)),
@@ -12,7 +12,7 @@ export const challengeSchema = Joi.object({
   maxTeamParticipants: Joi.number().min(1),
 });
 
-export const updateChallengeSchema = Joi.object({
+export const updateChallengeValidate = Joi.object({
   name: Joi.string().min(1),
   description: Joi.string().min(1),
   participants: Joi.array().items(Joi.string().min(1)),

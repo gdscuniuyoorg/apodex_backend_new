@@ -1,4 +1,3 @@
-import { number } from 'joi';
 import mongoose, { Document } from 'mongoose';
 
 export enum ParticipationType {
@@ -14,9 +13,9 @@ export interface IChallenge extends Document {
   startTime: Date;
   endTime: Date;
   rules: string;
-  minTeamParticipants?: number | undefined;
-  maxTeamParticipants?: number | undefined;
-  participants?: (typeof mongoose.Schema.ObjectId)[];
+  minTeamParticipants: number | undefined;
+  maxTeamParticipants: number | undefined;
+  participants: (typeof mongoose.Schema.ObjectId)[];
 }
 
 const challengeSchema = new mongoose.Schema<IChallenge>(
