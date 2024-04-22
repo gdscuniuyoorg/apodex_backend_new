@@ -2,38 +2,37 @@ import { NextFunction, RequestHandler } from 'express';
 import ChallangeTeam, { IChallangeTeam } from '../models/challengeTeamModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { CustomRequest } from './authController';
+import { CustomRequest } from '../types';
 import { UserRole } from '../models/userModel';
 import { updateTeamValidate } from '../helper/team.validate';
+import { idText } from 'typescript';
 
 class TeamController {
-  checkRole = async (
-    req: CustomRequest,
-    next: NextFunction,
-  ): Promise<IChallangeTeam | void> => {
-    const userId = req.user?.id;
-    const role = req.user?.role;
-    const { teamId } = req.params;
+  checkRole: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next): Promise<void> => {
+      const userId = req.user?.id;
+      const role = req.user?.role;
+      const { teamId } = req.params;
 
-    const team = await ChallangeTeam.findById(teamId);
+      const team = await ChallangeTeam.findById(teamId);
 
-    if (!team) {
-      return next(new AppError('This team does not exist', 404));
-    }
+      if (!team) {
+        return next(new AppError('This team does not exist', 404));
+      }
 
-    console.log(role === UserRole.ADMIN, team.teamLead?.toString(), userId);
-    if (
-      role !== UserRole.ADMIN ||
-      !team.teamLead ||
-      team.teamLead?.toString() !== userId
-    ) {
+      if (
+        role === UserRole.ADMIN ||
+        !team.teamLead ||
+        team.teamLead?.toString() === userId
+      ) {
+        req.team = team;
+        return next();
+      }
       return next(
         new AppError('You dont have permission to delete this team', 400),
       );
-    }
-
-    return team;
-  };
+    },
+  );
   // Update an existing team
   updateTeamName: RequestHandler = catchAsync(async (req, res, next) => {
     const { error, value } = updateTeamValidate.validate(req.body);
@@ -64,8 +63,11 @@ class TeamController {
   removeTalentFromTeam: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const { talentId } = req.body;
+      const team = req.team;
 
-      const team = await this.checkRole(req, next);
+      if (!talentId || talentId === '') {
+        return next(new AppError('Talent Id must be defined', 400));
+      }
 
       if (!team) {
         return next(new AppError('Team not found', 404));
@@ -86,17 +88,27 @@ class TeamController {
 
       await team.save();
 
-      res.status(201).send('success removing talent from team');
+      res.status(201).json({ message: 'success removing talent from team' });
     },
   );
 
   addTalentToTeam: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const { talentId } = req.body;
+      const team = req.team;
 
-      const team = await this.checkRole(req, next);
+      if (!talentId || talentId === '') {
+        return next(new AppError('Talent Id must be defined', 400));
+      }
+
       if (!team) {
         return next(new AppError('Team not found', 404));
+      }
+
+      if (team.talents.find((el) => el.toString() === talentId)) {
+        return next(
+          new AppError('This talent is already a member of this team', 400),
+        );
       }
 
       team.talents.push(talentId);
@@ -106,14 +118,14 @@ class TeamController {
 
       await team.save();
 
-      res.status(201).send('success add talent to team');
+      res.status(201).json({ message: 'success add talent to team' });
     },
   );
 
   // Delete a team
   deleteTeam: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
-      const team = await this.checkRole(req, next);
+      const team = req.team;
 
       if (!team) {
         return next(new AppError('Team does not exist', 404));

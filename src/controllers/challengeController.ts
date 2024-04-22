@@ -11,7 +11,7 @@ import {
 } from '../helper/challenge.validate';
 import APIFeatures, { QueryString } from '../utils/apiFeatures';
 import { teamValidate } from '../helper/team.validate';
-import { CustomRequest } from './authController';
+import { CustomRequest } from '../types';
 import ChallangeTeam from '../models/challengeTeamModel';
 
 class ChallengeController {

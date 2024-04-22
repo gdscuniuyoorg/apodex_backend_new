@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import Vote, { IVote } from '../models/voteModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { CustomRequest } from './authController';
+import { CustomRequest } from '../types';
 import ChallangeTeam from '../models/challengeTeamModel';
 
 class VoteController {

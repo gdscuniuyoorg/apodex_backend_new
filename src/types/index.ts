@@ -1,3 +1,7 @@
+import { IUser } from '../models/userModel';
+import { IChallangeTeam } from '../models/challengeTeamModel';
+import { Request } from 'express';
+
 export type IPlayer = {
   userName: string;
   gameId: string;
@@ -10,3 +14,7 @@ export type TokenUser = {
   password?: string;
 };
 
+export interface CustomRequest extends Request {
+  user?: IUser;
+  team?: IChallangeTeam;
+}

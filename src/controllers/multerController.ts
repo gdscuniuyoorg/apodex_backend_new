@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { CustomRequest } from './authController';
+import { CustomRequest } from '../types';
 import AppError from '../utils/appError';
 
 const multerStorage = multer.diskStorage({

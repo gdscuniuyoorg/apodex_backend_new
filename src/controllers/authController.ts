@@ -9,10 +9,7 @@ import { TokenUser } from '../types';
 import querystring from 'querystring';
 import axios from 'axios';
 import { CookieOptions } from 'express';
-
-export interface CustomRequest extends Request {
-  user?: IUser;
-}
+import { CustomRequest } from '../types';
 
 class AuthController {
   signToken = (user: TokenUser, isRefresh = false) => {
@@ -276,8 +273,6 @@ class AuthController {
     async (req: CustomRequest, res, next): Promise<void> => {
       // check the headers bearer token
       let token: string | undefined;
-
-      console.log('protecting');
 
       if (
         req.headers.authorization &&

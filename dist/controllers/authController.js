@@ -208,7 +208,6 @@ class AuthController {
         this.protect = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             // check the headers bearer token
             let token;
-            console.log('protecting');
             if (req.headers.authorization &&
                 req.headers.authorization.startsWith('Bearer')) {
                 token = req.headers.authorization.split(' ')[1];
