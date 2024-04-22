@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { CustomRequest } from './authController';
+import { CustomRequest } from '../types';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import sendReponse from '../utils/sendResponse';

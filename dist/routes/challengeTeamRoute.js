@@ -10,13 +10,13 @@ const router = (0, express_1.Router)();
 router.route('/all/:challengeId').get(challengeTeamController_1.default.getAllTeams);
 router
     .route('/add/:teamId')
-    .patch(authController_1.default.protect, challengeTeamController_1.default.addTalentToTeam);
+    .patch(authController_1.default.protect, challengeTeamController_1.default.checkRole, challengeTeamController_1.default.addTalentToTeam);
 router
     .route('/remove/:teamId')
-    .patch(authController_1.default.protect, challengeTeamController_1.default.addTalentToTeam);
+    .patch(authController_1.default.protect, challengeTeamController_1.default.checkRole, challengeTeamController_1.default.removeTalentFromTeam);
 router
     .route('/:teamId')
     .get(challengeTeamController_1.default.getTeam)
-    .patch(authController_1.default.protect, challengeTeamController_1.default.updateTeamName)
-    .delete(authController_1.default.protect, challengeTeamController_1.default.deleteTeam);
+    .patch(authController_1.default.protect, challengeTeamController_1.default.checkRole, challengeTeamController_1.default.updateTeamName)
+    .delete(authController_1.default.protect, challengeTeamController_1.default.checkRole, challengeTeamController_1.default.deleteTeam);
 exports.default = router;
