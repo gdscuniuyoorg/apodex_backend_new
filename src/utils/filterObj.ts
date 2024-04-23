@@ -14,17 +14,16 @@ export default filterObj;
 
 export const keysToExtract: string[] = [
   'bio',
-  'coverPhotoUrl',
   'dateOfBirth',
-  'nationality',
+  'location',
   'techInterests',
   'currentRole',
   'company',
-  'apodexImgUrl',
   'twitterUrl',
   'portfolioUrl',
   'linkedInUrl',
   'firstName',
   'image',
   'lastName',
+  'displayPhoto',
 ];

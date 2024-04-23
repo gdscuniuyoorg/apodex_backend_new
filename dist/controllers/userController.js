@@ -52,7 +52,7 @@ class UserController {
             // filter body properly
             const filterBody = (0, filterObj_1.default)(req.body, filterObj_1.keysToExtract);
             if (req.file) {
-                filterBody.image = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+                filterBody.displayPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
             }
             const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody }, { new: true });
             if (!profile) {

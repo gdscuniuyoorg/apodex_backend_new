@@ -21,7 +21,7 @@ class UserController {
       // filter body properly
       const filterBody = filterObj(req.body, keysToExtract);
       if (req.file) {
-        filterBody.image = `${req.protocol}://${req.get(
+        filterBody.displayPhoto = `${req.protocol}://${req.get(
           'host',
         )}/public/img/users/${req.file.filename}`;
       }
@@ -39,6 +39,7 @@ class UserController {
       sendReponse(res, 201, profile);
     },
   );
+
   getProfile: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const { user_id } = req.params;

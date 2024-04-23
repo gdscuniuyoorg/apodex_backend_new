@@ -39,6 +39,8 @@ export interface IUser extends Document {
   twitterUrl?: string;
   portfolioUrl: string;
   linkedInUrl?: string;
+  location: string;
+  displayPhoto: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -75,7 +77,7 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: [true, 'User must be assigned a role'],
       enum: Object.values(UserRole),
-      default: UserRole.ADMIN,
+      default: UserRole.USER,
     },
     passwordResetAt: Date,
     passwordResetToken: String,
@@ -91,6 +93,8 @@ const userSchema = new mongoose.Schema<IUser>(
     twitterUrl: String,
     portfolioUrl: String,
     linkedInUrl: String,
+    location: String,
+    displayPhoto: String,
   },
 
   {
