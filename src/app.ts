@@ -42,8 +42,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 //comes in here to find the specified filed to be served as static content
-app.use('/public', express.static(path.join(__dirname, 'public')));
-// hence you cannot use 127.0.0.1:3000/public/overview because express would think of this as a normal route and find a route handler for it
+app.use('/api/v1/public', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);

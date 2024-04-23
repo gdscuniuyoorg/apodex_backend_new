@@ -13,17 +13,16 @@ const filterObj = (body, keysToKeep) => {
 exports.default = filterObj;
 exports.keysToExtract = [
     'bio',
-    'coverPhotoUrl',
     'dateOfBirth',
-    'nationality',
+    'location',
     'techInterests',
     'currentRole',
     'company',
-    'apodexImgUrl',
     'twitterUrl',
     'portfolioUrl',
     'linkedInUrl',
     'firstName',
     'image',
     'lastName',
+    'displayPhoto',
 ];

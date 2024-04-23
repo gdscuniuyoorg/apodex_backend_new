@@ -55,7 +55,7 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
         required: [true, 'User must be assigned a role'],
         enum: Object.values(UserRole),
-        default: UserRole.ADMIN,
+        default: UserRole.USER,
     },
     passwordResetAt: Date,
     passwordResetToken: String,
@@ -70,6 +70,8 @@ const userSchema = new mongoose_1.default.Schema({
     twitterUrl: String,
     portfolioUrl: String,
     linkedInUrl: String,
+    location: String,
+    displayPhoto: String,
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
