@@ -42,7 +42,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 //comes in here to find the specified filed to be served as static content
-app.use('/api/v1/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, './../public')));
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
