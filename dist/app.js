@@ -36,7 +36,7 @@ const limiter = (0, express_rate_limit_1.default)({
 // rate limiter
 app.use('/api', limiter);
 //comes in here to find the specified filed to be served as static content
-app.use('/api/v1/public', express_1.default.static(path_1.default.join(__dirname, 'public')));
+app.use('/public', express_1.default.static(path_1.default.join(__dirname, './../public')));
 app.use('/api/v1/users', userRoutes_1.default);
 app.use('/api/v1/profiles', userProfileRoutes_1.default);
 app.use('/api/v1/courses', courseRoute_1.default);
