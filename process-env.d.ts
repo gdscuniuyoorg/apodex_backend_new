@@ -16,6 +16,9 @@ export declare global {
       GOOGLE_CLIENT_SECRET: string;
       GOOGLE_REDIRECT_URI: string;
       FRONTEND_URL: string;
+      CLOUDINARY_CLOUD_NAME: string;
+      CLOUDINARY_API_KEY: string;
+      CLOUDINARY_SECRET: string;
     }
   }
 }
