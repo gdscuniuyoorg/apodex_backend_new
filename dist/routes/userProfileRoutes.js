@@ -13,5 +13,5 @@ router
     .get(userController_1.default.getUsers)
     .patch(authController_1.default.protect, userController_1.default.updateProfile);
 router.route('/:user_id').get(userController_1.default.getProfile);
-router.patch('/image', authController_1.default.protect, (0, multerController_1.singleUpload)('photo'), userController_1.default.updateProfile);
+router.patch('/image', authController_1.default.protect, (0, multerController_1.singleUpload)('photo'), multerController_1.cloudinaryUpload, userController_1.default.updateProfile);
 exports.default = router;

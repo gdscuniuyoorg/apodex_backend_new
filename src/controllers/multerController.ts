@@ -53,7 +53,8 @@ export const multipleUpload = (fieldName: string, maxCount: number) => {
 };
 
 export const cloudinaryUpload: RequestHandler = catchAsync(
-  async (req, res, next) => {
+  async (req: CustomRequest, res, next) => {
+    console.log(req.file);
     if (!req.file) {
       return next(new AppError('No file uploaded', 400));
     }
@@ -64,7 +65,7 @@ export const cloudinaryUpload: RequestHandler = catchAsync(
         return next(new AppError('Error uploading file to Cloudinary', 500));
       }
 
-      req.url = result.secure_url;
+      req.image = result.secure_url;
       next();
     });
   },

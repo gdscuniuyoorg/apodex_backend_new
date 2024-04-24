@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import userController from '../controllers/userController';
 import authController from '../controllers/authController';
-import { singleUpload } from '../controllers/multerController';
+import {
+  cloudinaryUpload,
+  singleUpload,
+} from '../controllers/multerController';
 
 const router = Router();
 
@@ -16,6 +19,7 @@ router.patch(
   '/image',
   authController.protect,
   singleUpload('photo'),
+  cloudinaryUpload,
   userController.updateProfile,
 );
 

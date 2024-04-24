@@ -46,13 +46,19 @@ class UserController {
         this.updateProfile = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            const image = req === null || req === void 0 ? void 0 : req.image;
+            console.log('uploading');
+            console.log(image);
             if (req.body.password || req.body.passwordConfirm) {
                 return next(new appError_1.default('This route is not for password updates', 400));
             }
             // filter body properly
             const filterBody = (0, filterObj_1.default)(req.body, filterObj_1.keysToExtract);
-            if (req.file) {
-                filterBody.displayPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+            if (req.file && image) {
+                filterBody.displayPhoto = image;
+                // filterBody.displayPhoto = `${req.protocol}://${req.get(
+                //   'host',
+                // )}/public/img/users/${req.file.filename}`;
             }
             const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody }, { new: true });
             if (!profile) {
