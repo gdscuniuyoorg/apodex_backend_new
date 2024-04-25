@@ -165,54 +165,62 @@ class ChallengeController {
     },
   );
 
-  addChallenge: RequestHandler = catchAsync(async (req, res, next) => {
-    const { error, value } = challengeValidate.validate(req.body);
+  addChallenge: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const { error, value } = challengeValidate.validate(req.body);
+      const image = req?.image;
 
-    if (error) {
-      return next(new AppError(error.message, 400));
-    }
+      if (error) {
+        return next(new AppError(error.message, 400));
+      }
 
-    if (req.file) {
-      value.coverPhoto = `${req.protocol}://${req.get(
-        'host',
-      )}/public/img/users/${req.file.filename}`;
-    }
+      if (req.file && image) {
+        value.coverPhoto = image;
+        // value.coverPhoto = `${req.protocol}://${req.get(
+        //   'host',
+        // )}/public/img/users/${req.file.filename}`;
+      }
 
-    const challenge = await Challenge.create(value);
+      const challenge = await Challenge.create(value);
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        challenge,
-      },
-    });
-  });
+      res.status(201).json({
+        status: 'success',
+        data: {
+          challenge,
+        },
+      });
+    },
+  );
 
-  updateChallenge: RequestHandler = catchAsync(async (req, res, next) => {
-    const { error, value } = updateChallengeValidate.validate(req.body);
+  updateChallenge: RequestHandler = catchAsync(
+    async (req: CustomRequest, res, next) => {
+      const { error, value } = updateChallengeValidate.validate(req.body);
+      const image = req?.image;
 
-    if (error) {
-      return next(new AppError(error.message, 400));
-    }
+      if (error) {
+        return next(new AppError(error.message, 400));
+      }
 
-    if (req.file) {
-      value.coverPhoto = `${req.protocol}://${req.get(
-        'host',
-      )}/public/img/users/${req.file.filename}`;
-    }
+      if (req.file && image) {
+        value.coverPhoto = image;
+        // value.coverPhoto = `${req.protocol}://${req.get(
+        //   'host',
+        // )}/public/img/users/${req.file.filename}`;
+      }
 
-    const updatedChallenge = await Challenge.findByIdAndUpdate(
-      req.params.challengeId,
-      value,
-      { new: true, runValidators: true },
-    );
-    res.status(200).json({
-      status: 'success',
-      data: {
-        challenge: updatedChallenge,
-      },
-    });
-  });
+      const updatedChallenge = await Challenge.findByIdAndUpdate(
+        req.params.challengeId,
+        value,
+        { new: true, runValidators: true },
+      );
+      res.status(200).json({
+        status: 'success',
+        data: {
+          challenge: updatedChallenge,
+        },
+      });
+    },
+  );
 
   // Delete a challenge
   deleteChallenge: RequestHandler = catchAsync(async (req, res, next) => {

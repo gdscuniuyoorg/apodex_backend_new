@@ -17,4 +17,5 @@ export type TokenUser = {
 export interface CustomRequest extends Request {
   user?: IUser;
   team?: IChallangeTeam;
+  image?: string;
 }

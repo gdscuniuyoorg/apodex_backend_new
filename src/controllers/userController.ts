@@ -11,6 +11,7 @@ class UserController {
   updateProfile: RequestHandler = catchAsync(
     async (req: CustomRequest, res, next) => {
       const id = req.user?.id;
+      const image = req?.image;
 
       if (req.body.password || req.body.passwordConfirm) {
         return next(
@@ -20,10 +21,11 @@ class UserController {
 
       // filter body properly
       const filterBody = filterObj(req.body, keysToExtract);
-      if (req.file) {
-        filterBody.displayPhoto = `${req.protocol}://${req.get(
-          'host',
-        )}/public/img/users/${req.file.filename}`;
+      if (req.file && image) {
+        filterBody.displayPhoto = image;
+        // filterBody.displayPhoto = `${req.protocol}://${req.get(
+        //   'host',
+        // )}/public/img/users/${req.file.filename}`;
       }
 
       const profile = await User.findOneAndUpdate(

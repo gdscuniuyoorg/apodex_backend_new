@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { singleUpload } from '../controllers/multerController';
+import {
+  cloudinaryUpload,
+  singleUpload,
+} from '../controllers/uploadController';
 const router = Router();
 
 import challengeController from '../controllers/challengeController';
@@ -22,6 +25,7 @@ router
   .post(
     authController.protect,
     singleUpload('coverPhoto'),
+    cloudinaryUpload,
     challengeController.addChallenge,
   )
   .get(challengeController.getAllChallenges);
@@ -32,6 +36,7 @@ router
   .patch(
     authController.protect,
     singleUpload('coverPhoto'),
+    cloudinaryUpload,
     challengeController.updateChallenge,
   )
   .delete(authController.protect, challengeController.deleteChallenge);

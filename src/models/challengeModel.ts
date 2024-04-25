@@ -48,8 +48,8 @@ const challengeSchema = new mongoose.Schema<IChallenge>(
       required: [true, 'Challenge must have an end time'],
     },
     rules: String,
-    minTeamParticipants: Number,
-    maxTeamParticipants: Number,
+    minTeamParticipants: { type: Number, default: 1 },
+    maxTeamParticipants: { type: Number, default: 6 },
   },
   {
     timestamps: true,

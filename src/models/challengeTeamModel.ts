@@ -9,6 +9,9 @@ export interface IChallangeTeam extends Document {
   teamLead?: typeof mongoose.Schema.ObjectId;
   maxTalents: number;
   minTalents: number;
+  projectName: String;
+  projectDescription: String;
+  linkToProject: String;
 }
 
 const challangeTeamSchema = new mongoose.Schema<IChallangeTeam>(
@@ -24,6 +27,9 @@ const challangeTeamSchema = new mongoose.Schema<IChallangeTeam>(
     },
     votes: Number,
     teamLead: mongoose.Schema.ObjectId,
+    projectName: String,
+    projectDescription: String,
+    linkToProject: String,
     maxTalents: {
       type: Number,
       required: [true, 'Team must have a max number of talents'],
