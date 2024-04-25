@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { singleUpload } from '../controllers/multerController';
+import { singleUpload } from '../controllers/uploadController';
 const router = Router();
 
 import challengeController from '../controllers/challengeController';

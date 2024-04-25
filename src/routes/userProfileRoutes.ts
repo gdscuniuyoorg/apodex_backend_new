@@ -4,7 +4,7 @@ import authController from '../controllers/authController';
 import {
   cloudinaryUpload,
   singleUpload,
-} from '../controllers/multerController';
+} from '../controllers/uploadController';
 
 const router = Router();
 
