@@ -47,8 +47,6 @@ class UserController {
             var _a;
             const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
             const image = req === null || req === void 0 ? void 0 : req.image;
-            console.log('uploading');
-            console.log(image);
             if (req.body.password || req.body.passwordConfirm) {
                 return next(new appError_1.default('This route is not for password updates', 400));
             }

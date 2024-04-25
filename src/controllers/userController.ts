@@ -13,10 +13,6 @@ class UserController {
       const id = req.user?.id;
       const image = req?.image;
 
-      console.log('uploading');
-
-      console.log(image);
-
       if (req.body.password || req.body.passwordConfirm) {
         return next(
           new AppError('This route is not for password updates', 400),

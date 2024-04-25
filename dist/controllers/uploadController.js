@@ -28,15 +28,6 @@ const path_1 = __importDefault(require("path"));
 //     callback(null, `user-${req.user?.id}-${Date.now()}.${extension}`);
 //   },
 // });
-// const multerStorage = multer.diskStorage({
-//   destination(req: CustomRequest, file, callback) {
-//     callback(null, 'public/img/users');
-//   },
-//   filename(req: CustomRequest, file, callback) {
-//     const extension = file.mimetype.split('/')[1];
-//     callback(null, `user-${req.user?.id}-${Date.now()}.${extension}`);
-//   },
-// });
 // // initializing multer
 // const upload: multer.Multer = multer({
 //   storage: multerStorage,
@@ -70,7 +61,6 @@ const upload = (0, multer_1.default)({
     limits: { fileSize: 2 * 1024 * 1024 }, //filesize less then 2mb
     fileFilter: multerFilter,
 });
-console.dir(upload.single);
 const singleUpload = (fieldName) => {
     return upload.single(fieldName);
 };

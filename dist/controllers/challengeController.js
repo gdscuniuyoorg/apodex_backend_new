@@ -144,11 +144,15 @@ class ChallengeController {
         }));
         this.addChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { error, value } = challenge_validate_1.challengeValidate.validate(req.body);
+            const image = req === null || req === void 0 ? void 0 : req.image;
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            if (req.file) {
-                value.coverPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+            if (req.file && image) {
+                value.coverPhoto = image;
+                // value.coverPhoto = `${req.protocol}://${req.get(
+                //   'host',
+                // )}/public/img/users/${req.file.filename}`;
             }
             const challenge = yield challengeModel_1.default.create(value);
             res.status(201).json({
@@ -160,11 +164,15 @@ class ChallengeController {
         }));
         this.updateChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { error, value } = challenge_validate_1.updateChallengeValidate.validate(req.body);
+            const image = req === null || req === void 0 ? void 0 : req.image;
             if (error) {
                 return next(new appError_1.default(error.message, 400));
             }
-            if (req.file) {
-                value.coverPhoto = `${req.protocol}://${req.get('host')}/public/img/users/${req.file.filename}`;
+            if (req.file && image) {
+                value.coverPhoto = image;
+                // value.coverPhoto = `${req.protocol}://${req.get(
+                //   'host',
+                // )}/public/img/users/${req.file.filename}`;
             }
             const updatedChallenge = yield challengeModel_1.default.findByIdAndUpdate(req.params.challengeId, value, { new: true, runValidators: true });
             res.status(200).json({
