@@ -21,8 +21,7 @@ exports.keysToExtract = [
     'twitterUrl',
     'portfolioUrl',
     'linkedInUrl',
-    'firstName',
+    'name',
     'image',
-    'lastName',
     'displayPhoto',
 ];

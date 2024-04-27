@@ -10,7 +10,7 @@ import morgan from 'morgan';
 
 // importing routes
 import userRoutes from './routes/userRoutes';
-import profileRoutes from './routes/userProfileRoutes';
+import profileRoutes from './routes/profileRoutes';
 import teamRoutes from './routes/challengeTeamRoute';
 import voteRoutes from './routes/voteRoute';
 import challengeRoutes from './routes/challengeRoute';

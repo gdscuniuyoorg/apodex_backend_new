@@ -23,6 +23,7 @@ var UserRole;
     UserRole["USER"] = "user";
 })(UserRole || (exports.UserRole = UserRole = {}));
 const userSchema = new mongoose_1.default.Schema({
+    name: String,
     email: {
         type: String,
         required: [true, 'User must have an email'],

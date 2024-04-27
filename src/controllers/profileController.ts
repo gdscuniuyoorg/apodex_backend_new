@@ -5,6 +5,7 @@ import AppError from '../utils/appError';
 import sendReponse from '../utils/sendResponse';
 import User from '../models/userModel';
 import filterObj, { keysToExtract } from '../utils/filterObj';
+import APIFeatures, { QueryString } from '../utils/apiFeatures';
 
 class UserController {
   // constructor() {}
@@ -56,15 +57,25 @@ class UserController {
     },
   );
 
-  getUsers: RequestHandler = catchAsync(async (req, res, next) => {
-    const users = await User.find().select(
-      '-password -__v -confirmEmailToken -isEmailConfirmed -role',
-    );
+  getProfiles: RequestHandler = catchAsync(async (req, res, next) => {
+    const features = new APIFeatures(
+      User.find().select(
+        '-password -__v -confirmEmailToken -isEmailConfirmed -role',
+      ),
+      req.query as QueryString,
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+      .search();
+
+    const users = await features.query;
     if (!users) {
       return next(new AppError('User profiles does not exist', 404));
     }
 
-    sendReponse(res, 200, users);
+    sendReponse(res, 200, { length: users.length, users });
   });
 }
 
