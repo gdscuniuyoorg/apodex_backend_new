@@ -28,6 +28,7 @@ class AuthController {
     user: any,
     statusCode: number,
     res: Response,
+    req: Request,
     sendRes: boolean,
   ) => {
     const token = this.signToken({ id: user.id, email: user.email });
@@ -42,7 +43,7 @@ class AuthController {
     const cookieOptions: CookieOptions = {
       maxAge: 900000,
       sameSite: 'lax',
-      domain: 'localhost',
+      domain: `.${req.get('host')}`,
       httpOnly: true,
       secure: false,
       path: '/',
@@ -75,7 +76,7 @@ class AuthController {
     if (!user) {
       return next(new AppError('User not found', 404));
     }
-    this.createAndSendToken(res, 201, res, true);
+    this.createAndSendToken(res, 201, res, req, true);
   });
 
   //   signup or signin with google
@@ -90,7 +91,6 @@ class AuthController {
         `client_id=${clientId}&redirect_uri=${redirectUri}` +
         `&response_type=code&scope=${scopes.join('+')}`;
 
-      // Return the URL to frontend
       res.status(200).json({ url: authUrl, status: 'success' });
     },
   );
@@ -134,7 +134,7 @@ class AuthController {
       { upsert: true, new: true },
     );
 
-    this.createAndSendToken(user, 201, res, false);
+    this.createAndSendToken(user, 201, res, req, false);
     res.redirect(`${process.env.FRONTEND_URL}`);
   });
 
@@ -152,7 +152,7 @@ class AuthController {
       user.isEmailConfirmed = true;
       user.save({ validateBeforeSave: false });
 
-      res.redirect('frontend');
+      res.redirect(process.env.FRONTEND_URL);
     },
   );
 
@@ -184,7 +184,7 @@ class AuthController {
 
     await new Email(user, confirmEmailUrl).sendVerifyAndWelcome()
    */
-    this.createAndSendToken(user, 201, res, true);
+    this.createAndSendToken(user, 201, res, req, true);
   });
 
   login: RequestHandler = catchAsync(async (req, res, next): Promise<void> => {
@@ -201,7 +201,7 @@ class AuthController {
       return next(new AppError('User email or password is invalid', 404));
     }
 
-    this.createAndSendToken(user, 201, res, true);
+    this.createAndSendToken(user, 201, res, req, true);
   });
 
   forgetPassword: RequestHandler = catchAsync(
