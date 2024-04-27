@@ -22,8 +22,7 @@ export const keysToExtract: string[] = [
   'twitterUrl',
   'portfolioUrl',
   'linkedInUrl',
-  'firstName',
+  'name',
   'image',
-  'lastName',
   'displayPhoto',
 ];

@@ -9,8 +9,7 @@ export enum UserRole {
 }
 
 export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   image: string;
   password: string;
@@ -45,6 +44,7 @@ export interface IUser extends Document {
 
 const userSchema = new mongoose.Schema<IUser>(
   {
+    name: String,
     email: {
       type: String,
       required: [true, 'User must have an email'],

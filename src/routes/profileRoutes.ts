@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import userController from '../controllers/userController';
+import userController from '../controllers/profileController';
 import authController from '../controllers/authController';
 import {
   cloudinaryUpload,
@@ -10,7 +10,7 @@ const router = Router();
 
 router
   .route('/')
-  .get(userController.getUsers)
+  .get(userController.getProfiles)
   .patch(authController.protect, userController.updateProfile);
 
 router.route('/:user_id').get(userController.getProfile);

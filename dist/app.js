@@ -13,7 +13,7 @@ const path_1 = __importDefault(require("path"));
 const morgan_1 = __importDefault(require("morgan"));
 // importing routes
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
-const userProfileRoutes_1 = __importDefault(require("./routes/userProfileRoutes"));
+const profileRoutes_1 = __importDefault(require("./routes/profileRoutes"));
 const challengeTeamRoute_1 = __importDefault(require("./routes/challengeTeamRoute"));
 const voteRoute_1 = __importDefault(require("./routes/voteRoute"));
 const challengeRoute_1 = __importDefault(require("./routes/challengeRoute"));
@@ -38,7 +38,7 @@ app.use('/api', limiter);
 //comes in here to find the specified filed to be served as static content
 app.use('/public', express_1.default.static(path_1.default.join(__dirname, './../public')));
 app.use('/api/v1/users', userRoutes_1.default);
-app.use('/api/v1/profiles', userProfileRoutes_1.default);
+app.use('/api/v1/profiles', profileRoutes_1.default);
 app.use('/api/v1/courses', courseRoute_1.default);
 app.use('/api/v1/challenges', challengeRoute_1.default);
 app.use('/api/v1/votes', voteRoute_1.default);
