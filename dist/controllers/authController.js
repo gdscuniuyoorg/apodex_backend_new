@@ -29,7 +29,7 @@ class AuthController {
                     : process.env.JWT_SECRET_IN,
             });
         };
-        this.createAndSendToken = (user, statusCode, res, sendRes) => {
+        this.createAndSendToken = (user, statusCode, res, req, sendRes) => {
             const token = this.signToken({ id: user.id, email: user.email });
             const refreshToken = this.signToken({ id: user.id }, true);
             const cookieExpireTime = process.env.JWT_COOKIE_EXPIRES_IN;
@@ -40,7 +40,7 @@ class AuthController {
             const cookieOptions = {
                 maxAge: 900000,
                 sameSite: 'lax',
-                domain: 'localhost',
+                domain: `.${req.get('host')}`,
                 httpOnly: true,
                 secure: false,
                 path: '/',
@@ -68,7 +68,7 @@ class AuthController {
             if (!user) {
                 return next(new appError_1.default('User not found', 404));
             }
-            this.createAndSendToken(res, 201, res, true);
+            this.createAndSendToken(res, 201, res, req, true);
         }));
         //   signup or signin with google
         this.googleSignUpInitiate = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -78,7 +78,6 @@ class AuthController {
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
                 `client_id=${clientId}&redirect_uri=${redirectUri}` +
                 `&response_type=code&scope=${scopes.join('+')}`;
-            // Return the URL to frontend
             res.status(200).json({ url: authUrl, status: 'success' });
         }));
         this.googleSignUpCallback = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -108,7 +107,7 @@ class AuthController {
                 image: picture,
                 isEmailConfirmed: true,
             }, { upsert: true, new: true });
-            this.createAndSendToken(user, 201, res, false);
+            this.createAndSendToken(user, 201, res, req, false);
             res.redirect(`${process.env.FRONTEND_URL}`);
         }));
         this.confirmEmailAndActivateAccount = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -121,7 +120,7 @@ class AuthController {
             }
             user.isEmailConfirmed = true;
             user.save({ validateBeforeSave: false });
-            res.redirect('frontend');
+            res.redirect(process.env.FRONTEND_URL);
         }));
         this.signup = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { email, password, passwordConfirm, role } = req.body;
@@ -146,7 +145,7 @@ class AuthController {
         
             await new Email(user, confirmEmailUrl).sendVerifyAndWelcome()
            */
-            this.createAndSendToken(user, 201, res, true);
+            this.createAndSendToken(user, 201, res, req, true);
         }));
         this.login = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { email, password } = req.body;
@@ -158,7 +157,7 @@ class AuthController {
             if (!user || !(yield user.comparePassword(password))) {
                 return next(new appError_1.default('User email or password is invalid', 404));
             }
-            this.createAndSendToken(user, 201, res, true);
+            this.createAndSendToken(user, 201, res, req, true);
         }));
         this.forgetPassword = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             // forget password
