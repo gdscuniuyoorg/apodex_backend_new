@@ -137,14 +137,14 @@ class AuthController {
             const confirmEmailToken = crypto_1.default.randomBytes(32).toString('hex');
             user.confirmEmailToken = confirmEmailToken;
             yield user.save({ validateBeforeSave: false });
-            /*
-            I am holding off on sending emails for the time being
-            const confirmEmailUrl = `${req.protocol}://${req.get(
-              'host',
-            )}/api/v1/users/confirmEmail/${confirmEmailToken}`;
-        
-            await new Email(user, confirmEmailUrl).sendVerifyAndWelcome()
-           */
+            //I am holding off on sending emails for the time being
+            const confirmEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/users/confirmEmail/${confirmEmailToken}`;
+            try {
+                yield new email_1.default(user, confirmEmailUrl).sendVerifyAndWelcome();
+            }
+            catch (error) {
+                res.send({ error: error });
+            }
             this.createAndSendToken(user, 201, res, req, true);
         }));
         this.login = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {

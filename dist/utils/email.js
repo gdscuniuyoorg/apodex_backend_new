@@ -18,14 +18,14 @@ class Email {
     constructor(user, url) {
         this.to = user.email;
         this.url = url;
-        this.from = `Apodex <mfoniso@gmail.com>`;
+        this.from = `Apodex <gdscuniuyo@gmail.com>`;
         this.name = user.name;
     }
     newTransport() {
         // if(process.env.NODE_ENV ==='production'){
         //   return 1
         // }
-        return nodemailer_1.default.createTransport({
+        const transport = nodemailer_1.default.createTransport({
             host: process.env.EMAIL_HOST,
             port: +process.env.EMAIL_PORT,
             secure: false,
@@ -34,6 +34,7 @@ class Email {
                 user: process.env.EMAIL_USERNAME,
             },
         });
+        return transport;
     }
     send(template, subject) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,7 +48,7 @@ class Email {
                 from: this.from,
                 to: this.to,
                 subject: subject,
-                html,
+                html: '<h1>This is some dummy email</h1>',
                 // text: htmlToText.fromString(html)
                 text: '123',
             };

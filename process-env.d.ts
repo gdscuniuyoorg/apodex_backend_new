@@ -19,6 +19,10 @@ export declare global {
       CLOUDINARY_CLOUD_NAME: string;
       CLOUDINARY_API_KEY: string;
       CLOUDINARY_SECRET: string;
+      BREVO_API_KEY: string;
+      BREVO_HOST: string;
+      BREVO_PORT: string;
+      BREVO_EMAIL: string;
     }
   }
 }

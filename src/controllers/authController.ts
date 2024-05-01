@@ -176,14 +176,17 @@ class AuthController {
     user.confirmEmailToken = confirmEmailToken;
     await user.save({ validateBeforeSave: false });
 
-    /* 
-    I am holding off on sending emails for the time being
+    //I am holding off on sending emails for the time being
     const confirmEmailUrl = `${req.protocol}://${req.get(
       'host',
     )}/api/v1/users/confirmEmail/${confirmEmailToken}`;
 
-    await new Email(user, confirmEmailUrl).sendVerifyAndWelcome()
-   */
+    try {
+      await new Email(user, confirmEmailUrl).sendVerifyAndWelcome();
+    } catch (error) {
+      res.send({ error: error });
+    }
+
     this.createAndSendToken(user, 201, res, req, true);
   });
 
