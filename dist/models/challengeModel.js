@@ -49,7 +49,7 @@ const challengeSchema = new mongoose_1.default.Schema({
     },
     rules: String,
     minTeamParticipants: { type: Number, default: 1 },
-    maxTeamParticipants: { type: Number, default: 6 },
+    maxTeamParticipants: { type: Number, default: 10 },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

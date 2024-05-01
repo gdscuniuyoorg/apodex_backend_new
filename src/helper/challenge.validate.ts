@@ -8,8 +8,8 @@ export const challengeValidate = Joi.object({
   startTime: Joi.date().iso().required(),
   endTime: Joi.date().iso().required(),
   rules: Joi.string().min(1).required(),
-  minTeamParticipants: Joi.number().min(1),
-  maxTeamParticipants: Joi.number().min(1),
+  minTeamParticipants: Joi.number().min(1).optional(),
+  maxTeamParticipants: Joi.number().min(1).optional(),
 });
 
 export const updateChallengeValidate = Joi.object({

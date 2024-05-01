@@ -17,8 +17,6 @@ const challangeTeamSchema = new mongoose_1.default.Schema({
     votes: Number,
     teamLead: mongoose_1.default.Schema.ObjectId,
     projectName: String,
-    projectDescription: String,
-    linkToProject: String,
     maxTalents: {
         type: Number,
         required: [true, 'Team must have a max number of talents'],
