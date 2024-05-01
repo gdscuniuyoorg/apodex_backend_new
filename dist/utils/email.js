@@ -19,7 +19,7 @@ class Email {
         this.to = user.email;
         this.url = url;
         this.from = `Apodex <mfoniso@gmail.com>`;
-        this.firstName = user.firstName;
+        this.name = user.name;
     }
     newTransport() {
         // if(process.env.NODE_ENV ==='production'){
@@ -39,7 +39,7 @@ class Email {
         return __awaiter(this, void 0, void 0, function* () {
             // 1: Render html based on file
             const html = pug_1.default.renderFile(`${__dirname}/../views/email/${template}.pug`, {
-                firstName: this.firstName,
+                firstName: this.name,
                 url: this.url,
                 subject,
             });

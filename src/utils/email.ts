@@ -6,13 +6,13 @@ class Email {
   to: string;
   url: string;
   from: string;
-  firstName: string;
+  name: string;
 
   constructor(user: IUser, url: string) {
     this.to = user.email;
     this.url = url;
     this.from = `Apodex <mfoniso@gmail.com>`;
-    this.firstName = user.firstName;
+    this.name = user.name;
   }
 
   newTransport() {
@@ -32,7 +32,7 @@ class Email {
   async send(template: string, subject: string) {
     // 1: Render html based on file
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
-      firstName: this.firstName,
+      firstName: this.name,
       url: this.url,
       subject,
     });

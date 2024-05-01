@@ -13,8 +13,8 @@ exports.challengeValidate = joi_1.default.object({
     startTime: joi_1.default.date().iso().required(),
     endTime: joi_1.default.date().iso().required(),
     rules: joi_1.default.string().min(1).required(),
-    minTeamParticipants: joi_1.default.number().min(1),
-    maxTeamParticipants: joi_1.default.number().min(1),
+    minTeamParticipants: joi_1.default.number().min(1).optional(),
+    maxTeamParticipants: joi_1.default.number().min(1).optional(),
 });
 exports.updateChallengeValidate = joi_1.default.object({
     name: joi_1.default.string().min(1),

@@ -9,8 +9,10 @@ exports.teamValidate = joi_1.default.object({
     name: joi_1.default.string().min(1).required(),
     talents: joi_1.default.array().items(joi_1.default.string().min(1)).required(),
     challengeId: joi_1.default.string().min(1).required(),
+    projectName: joi_1.default.string().min(1).required(),
 });
 exports.updateTeamValidate = joi_1.default.object({
     name: joi_1.default.string().min(1),
     talents: joi_1.default.array().items(joi_1.default.string().min(1)),
+    projectName: joi_1.default.string().min(1),
 });
