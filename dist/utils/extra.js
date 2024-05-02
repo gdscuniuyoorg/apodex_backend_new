@@ -12,34 +12,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const pug_1 = __importDefault(require("pug"));
-const Brevo = require('@getbrevo/brevo');
 class Email {
     constructor(user, url) {
         this.to = user.email;
         this.url = url;
         this.from = `Apodex <gdscuniuyo@gmail.com>`;
         this.name = user.name;
-        this.apiInstance = new Brevo.TransactionalEmailsApi();
-        this.apiKey = this.apiInstance.authentications['apiKey'];
-        this.apiKey.apiKey = process.env.BREVO_API_KEY;
+    }
+    newTransport() {
+        // if(process.env.NODE_ENV ==='production'){
+        //   return 1
+        // }
+        const transport = nodemailer_1.default.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: +process.env.EMAIL_PORT,
+            secure: false,
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+        return transport;
     }
     send(template, subject) {
         return __awaiter(this, void 0, void 0, function* () {
+            // 1: Render html based on file
             const html = pug_1.default.renderFile(`${__dirname}/../views/email/${template}.pug`, {
                 firstName: this.name,
                 url: this.url,
                 subject,
             });
-            const sendSmtpEmail = new Brevo.SendSmtpEmail();
-            sendSmtpEmail.subject = subject;
-            sendSmtpEmail.htmlContent = html;
-            sendSmtpEmail.sender = {
-                name: 'GDSC UNIUYO',
-                email: 'gdscuniuyo@gmail.com',
+            const mailOptions = {
+                from: this.from,
+                to: this.to,
+                subject: subject,
+                html,
+                // text: htmlToText.fromString(html)
+                text: '123',
             };
-            sendSmtpEmail.to = [{ email: this.to, name: this.name }];
-            yield this.apiInstance.sendTransacEmail(sendSmtpEmail);
+            return yield this.newTransport().sendMail(mailOptions);
         });
     }
     sendVerifyAndWelcome() {
