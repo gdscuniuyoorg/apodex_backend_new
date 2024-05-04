@@ -8,6 +8,8 @@ import {
 
 const router = Router();
 
+router.get('/me', authController.protect, userController.getMe);
+
 router
   .route('/')
   .get(userController.getProfiles)

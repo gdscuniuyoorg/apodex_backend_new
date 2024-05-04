@@ -181,7 +181,7 @@ class AuthController {
       'host',
     )}/api/v1/users/confirmEmail/${confirmEmailToken}`;
 
-    await new Email(user, confirmEmailUrl).sendVerifyAndWelcome();
+    // await new Email(user, confirmEmailUrl).sendVerifyAndWelcome();
 
     this.createAndSendToken(user, 201, res, req, true);
   });

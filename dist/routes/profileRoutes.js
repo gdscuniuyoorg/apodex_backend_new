@@ -8,6 +8,7 @@ const profileController_1 = __importDefault(require("../controllers/profileContr
 const authController_1 = __importDefault(require("../controllers/authController"));
 const uploadController_1 = require("../controllers/uploadController");
 const router = (0, express_1.Router)();
+router.get('/me', authController_1.default.protect, profileController_1.default.getMe);
 router
     .route('/')
     .get(profileController_1.default.getProfiles)

@@ -33,7 +33,7 @@ class UserController {
         { _id: id },
         { $set: filterBody },
         { new: true },
-      );
+      ).select('-password -__v -confirmEmailToken -isEmailConfirmed -role');
 
       if (!profile) {
         return next(new AppError('Profile not found', 404));
@@ -47,7 +47,9 @@ class UserController {
     async (req: CustomRequest, res, next) => {
       const { user_id } = req.params;
 
-      const profile = await User.findOne({ _id: user_id });
+      const profile = await User.findOne({ _id: user_id }).select(
+        '-password -__v -confirmEmailToken -isEmailConfirmed -role',
+      );
 
       if (!profile) {
         return next(new AppError('An error occured fetching userProfile', 400));
@@ -76,6 +78,18 @@ class UserController {
     }
 
     sendReponse(res, 200, { length: users.length, users });
+  });
+
+  getMe: RequestHandler = catchAsync(async (req: CustomRequest, res, next) => {
+    const id = req.user?.id;
+
+    const user = await User.findOne({ _id: id });
+
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
+
+    sendReponse(res, 200, user);
   });
 }
 
