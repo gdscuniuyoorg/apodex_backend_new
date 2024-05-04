@@ -1,45 +1,57 @@
 import nodemailer from 'nodemailer';
 import { IUser } from '../models/userModel';
 import pug from 'pug';
-const Brevo = require('@getbrevo/brevo');
+import brevo from '@getbrevo/brevo';
 
 class Email {
   to: string;
   url: string;
   from: string;
   name: string;
-  apiInstance: any;
-  apiKey: any;
 
   constructor(user: IUser, url: string) {
     this.to = user.email;
     this.url = url;
     this.from = `Apodex <gdscuniuyo@gmail.com>`;
     this.name = user.name;
-
-    this.apiInstance = new Brevo.TransactionalEmailsApi();
-
-    this.apiKey = this.apiInstance.authentications['apiKey'];
-    this.apiKey.apiKey = process.env.BREVO_API_KEY;
   }
 
+  newTransport() {
+    // if(process.env.NODE_ENV ==='production'){
+    //   return 1
+    // }
+
+    const transport = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: +process.env.EMAIL_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    return transport;
+  }
   async send(template: string, subject: string) {
+    // 1: Render html based on file
+
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.name,
       url: this.url,
       subject,
     });
 
-    const sendSmtpEmail = new Brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = html;
-    sendSmtpEmail.sender = {
-      name: 'GDSC UNIUYO',
-      email: 'gdscuniuyo@gmail.com',
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject: subject,
+      html,
+      // text: htmlToText.fromString(html)
+      text: '123',
     };
-    sendSmtpEmail.to = [{ email: this.to, name: this.name }];
 
-    await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+    return await this.newTransport().sendMail(mailOptions);
   }
 
   async sendVerifyAndWelcome() {

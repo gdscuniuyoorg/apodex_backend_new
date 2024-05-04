@@ -59,7 +59,7 @@ class UserController {
                 //   'host',
                 // )}/public/img/users/${req.file.filename}`;
             }
-            const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody }, { new: true });
+            const profile = yield userModel_1.default.findOneAndUpdate({ _id: id }, { $set: filterBody }, { new: true }).select('-password -__v -confirmEmailToken -isEmailConfirmed -role');
             if (!profile) {
                 return next(new appError_1.default('Profile not found', 404));
             }
@@ -67,7 +67,7 @@ class UserController {
         }));
         this.getProfile = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { user_id } = req.params;
-            const profile = yield userModel_1.default.findOne({ _id: user_id });
+            const profile = yield userModel_1.default.findOne({ _id: user_id }).select('-password -__v -confirmEmailToken -isEmailConfirmed -role');
             if (!profile) {
                 return next(new appError_1.default('An error occured fetching userProfile', 400));
             }
@@ -85,6 +85,15 @@ class UserController {
                 return next(new appError_1.default('User profiles does not exist', 404));
             }
             (0, sendResponse_1.default)(res, 200, { length: users.length, users });
+        }));
+        this.getMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            var _b;
+            const id = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+            const user = yield userModel_1.default.findOne({ _id: id });
+            if (!user) {
+                return next(new appError_1.default('User not found', 404));
+            }
+            (0, sendResponse_1.default)(res, 200, user);
         }));
     }
 }
