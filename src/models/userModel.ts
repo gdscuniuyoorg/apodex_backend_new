@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 export enum UserRole {
@@ -72,13 +72,13 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    confirmEmailToken: String,
     role: {
       type: String,
       required: [true, 'User must be assigned a role'],
       enum: Object.values(UserRole),
       default: UserRole.USER,
     },
+    confirmEmailToken: String,
     passwordResetAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpireTime: Date,

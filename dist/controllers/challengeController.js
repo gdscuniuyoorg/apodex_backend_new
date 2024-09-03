@@ -105,8 +105,8 @@ class ChallengeController {
             });
         }));
         this.exitChallenge = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            var _b;
-            const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+            var _a;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
             const { challengeId } = req.params;
             const challenge = yield challengeModel_1.default.findById(challengeId);
             if (!challenge) {

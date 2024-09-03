@@ -63,7 +63,7 @@ class UserController {
     const features = new APIFeatures(
       User.find().select(
         '-password -__v -confirmEmailToken -isEmailConfirmed -role',
-      ),
+      ) as any,
       req.query as QueryString,
     )
       .filter()

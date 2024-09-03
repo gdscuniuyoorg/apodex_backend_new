@@ -16,7 +16,6 @@ const userModel_1 = __importDefault(require("../models/userModel"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const email_1 = __importDefault(require("../utils/email"));
 const crypto_1 = __importDefault(require("crypto"));
 const querystring_1 = __importDefault(require("querystring"));
 const axios_1 = __importDefault(require("axios"));
@@ -166,7 +165,7 @@ class AuthController {
             yield user.save({ validateBeforeSave: false });
             try {
                 const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/user/resetPassword/${resetToken}`;
-                yield new email_1.default(user, resetUrl).sendPasswordReset();
+                // await new Email(user, resetUrl).sendPasswordReset();
                 res.status(201).json({
                     status: 'success',
                     message: 'Password reset token sent successfully',

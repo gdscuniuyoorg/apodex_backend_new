@@ -223,7 +223,7 @@ class AuthController {
           'host',
         )}/api/v1/user/resetPassword/${resetToken}`;
 
-        await new Email(user, resetUrl).sendPasswordReset();
+        // await new Email(user, resetUrl).sendPasswordReset();
 
         res.status(201).json({
           status: 'success',
