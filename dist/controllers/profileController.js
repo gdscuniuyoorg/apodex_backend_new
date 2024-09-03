@@ -87,8 +87,8 @@ class UserController {
             (0, sendResponse_1.default)(res, 200, { length: users.length, users });
         }));
         this.getMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            var _b;
-            const id = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+            var _a;
+            const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
             const user = yield userModel_1.default.findOne({ _id: id });
             if (!user) {
                 return next(new appError_1.default('User not found', 404));

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRole = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const validator_1 = __importDefault(require("validator"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
 var UserRole;
 (function (UserRole) {
@@ -51,13 +51,13 @@ const userSchema = new mongoose_1.default.Schema({
         type: Boolean,
         default: false,
     },
-    confirmEmailToken: String,
     role: {
         type: String,
         required: [true, 'User must be assigned a role'],
         enum: Object.values(UserRole),
         default: UserRole.USER,
     },
+    confirmEmailToken: String,
     passwordResetAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpireTime: Date,
@@ -83,7 +83,7 @@ userSchema.pre('save', function (next) {
         if (!this.isModified('password')) {
             return next();
         }
-        const hashPassword = yield bcrypt_1.default.hash(this.password, 12);
+        const hashPassword = yield bcryptjs_1.default.hash(this.password, 12);
         this.password = hashPassword;
         this.passwordConfirm = undefined;
         next();
@@ -100,7 +100,7 @@ userSchema.pre('save', function (next) {
 });
 userSchema.methods.comparePassword = function (password) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield bcrypt_1.default.compare(password, this.password);
+        return yield bcryptjs_1.default.compare(password, this.password);
     });
 };
 userSchema.methods.compareResetPasswordTime = function (time) {
