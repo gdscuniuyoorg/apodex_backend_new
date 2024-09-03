@@ -1,4 +1,4 @@
-import { Document, Query } from 'mongoose';
+import { Document, FilterQuery, Query } from 'mongoose';
 
 export interface QueryString {
   [key: string]: string | undefined;
@@ -59,7 +59,7 @@ class APIFeatures<T extends Document> {
       const searchQuery = this.queryString.search;
       const regex = new RegExp(searchQuery, 'i');
       this.query = this.query.or([
-        { name: { $regex: regex } },
+        { name: { $regex: regex } } as FilterQuery<T>,
         { 'instructor.name': { $regex: regex } },
       ]);
     }
