@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import { IUser } from '../models/userModel';
 import pug from 'pug';
 const Brevo = require('@getbrevo/brevo');
